@@ -40,7 +40,7 @@ export default function Home() {
 
   const calculatePitchScore = () => {
     let score = 0;
-    const maxScore = 100;
+    const maxScore = 140; // PRD specifies 140 points total
     
     // About You
     if (formData.name) score += 5;
@@ -65,7 +65,8 @@ export default function Home() {
     if (formData.socialPlatform) score += 5;
     if (formData.followers) score += 10;
     
-    return Math.min(score, maxScore);
+    // Convert to percentage (140 points = 100%)
+    return Math.min(Math.round((score / maxScore) * 100), 100);
   };
 
   const score = calculatePitchScore();

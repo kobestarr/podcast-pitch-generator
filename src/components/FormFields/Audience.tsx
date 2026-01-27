@@ -21,7 +21,7 @@ const platforms = [
   { value: 'newsletter', label: 'Newsletter (subscribers)' },
 ];
 
-function roundFollowers(count: number): string {
+function roundFollowers(count: number): number {
   if (count < 1000) {
     return Math.ceil(count / 50) * 50;
   } else if (count < 10000) {
@@ -71,8 +71,11 @@ export function Audience({ formData, updateFormData, onNext, onBack }: Props) {
             Primary platform
           </label>
           <select
+            id="social-platform-select"
             value={formData.socialPlatform}
             onChange={(e) => updateFormData('socialPlatform', e.target.value)}
+            aria-required="true"
+            aria-invalid={!formData.socialPlatform}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all bg-white"
           >
             <option value="">Select platform...</option>
@@ -84,15 +87,22 @@ export function Audience({ formData, updateFormData, onNext, onBack }: Props) {
 
         {/* Followers */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="followers-input"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Approximate followers/subscribers
           </label>
           <input
+            id="followers-input"
             type="number"
             value={formData.followers}
             onChange={(e) => updateFormData('followers', e.target.value)}
             placeholder="10000"
             min="0"
+            aria-required="true"
+            aria-invalid={!formData.followers}
+            aria-describedby="followers-helper"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
           
@@ -106,7 +116,7 @@ export function Audience({ formData, updateFormData, onNext, onBack }: Props) {
             </div>
           )}
           
-          <p className="text-sm text-gray-500 mt-2">
+          <p id="followers-helper" className="text-sm text-gray-500 mt-2">
             Round to the nearest 50, 500, 5,000, or 25,000 automatically.
           </p>
         </div>

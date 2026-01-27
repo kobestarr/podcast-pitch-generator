@@ -45,13 +45,17 @@ export function YourValue({ formData, updateFormData, onNext, onBack }: Props) {
           </label>
           <div className="space-y-3">
             <input
+              id="topic1-input"
               type="text"
               value={formData.topic1}
               onChange={(e) => updateFormData('topic1', e.target.value)}
               placeholder="Topic 1 - e.g., Why most SaaS companies get pricing wrong"
+              aria-required="true"
+              aria-invalid={!formData.topic1}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
             />
             <input
+              id="topic2-input"
               type="text"
               value={formData.topic2}
               onChange={(e) => updateFormData('topic2', e.target.value)}
@@ -59,6 +63,7 @@ export function YourValue({ formData, updateFormData, onNext, onBack }: Props) {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
             />
             <input
+              id="topic3-input"
               type="text"
               value={formData.topic3}
               onChange={(e) => updateFormData('topic3', e.target.value)}
@@ -74,13 +79,22 @@ export function YourValue({ formData, updateFormData, onNext, onBack }: Props) {
             What makes YOUR perspective different? *
           </label>
           <textarea
+            id="unique-angle-textarea"
             value={formData.uniqueAngle}
-            onChange={(e) => updateFormData('uniqueAngle', e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= 500) {
+                updateFormData('uniqueAngle', e.target.value);
+              }
+            }}
             placeholder="I've seen the same pricing mistakes at 3 different SaaS companies. Here's what actually works..."
             rows={4}
+            maxLength={500}
+            aria-required="true"
+            aria-invalid={formData.uniqueAngle.length < 30}
+            aria-describedby="unique-angle-helper"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p id="unique-angle-helper" className="text-sm text-gray-500 mt-1">
             {formData.uniqueAngle.length}/500 characters
           </p>
         </div>
