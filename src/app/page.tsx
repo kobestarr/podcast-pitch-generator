@@ -6,41 +6,75 @@ import { AboutPodcast } from '@/components/FormFields/AboutPodcast';
 import { Audience } from '@/components/FormFields/Audience';
 import { YourValue } from '@/components/FormFields/YourValue';
 import { PitchScore } from '@/components/PitchScore';
+import { Results } from '@/components/Results';
 
 type Step = 'about-you' | 'about-podcast' | 'audience' | 'your-value' | 'generating' | 'results';
 
+interface FormData {
+  name: string;
+  title: string;
+  expertise: string;
+  credibility: string;
+  podcastName: string;
+  hostName: string;
+  guestName: string;
+  episodeTopic: string;
+  whyPodcast: string;
+  socialPlatform: string;
+  followers: string;
+  topic1: string;
+  topic2: string;
+  topic3: string;
+  uniqueAngle: string;
+  audienceBenefit: string;
+}
+
+interface PitchResponse {
+  success: boolean;
+  generationTimeMs: number;
+  pitches: {
+    pitch_1: { style: string; subject: string; body: string };
+    pitch_2: { style: string; subject: string; body: string };
+    pitch_3: { style: string; subject: string; body: string };
+    followup_1: { timing: string; subject: string; body: string };
+    followup_2: { timing: string; subject: string; body: string };
+    followup_3: { timing: string; subject: string; body: string };
+  };
+  rateLimit?: { remaining: number };
+  error?: string;
+}
+
 export default function Home() {
   const [step, setStep] = useState<Step>('about-you');
-  const [formData, setFormData] = useState({
-    // About You
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     title: '',
     expertise: '',
     credibility: '',
-    // About Podcast
     podcastName: '',
     hostName: '',
     guestName: '',
     episodeTopic: '',
     whyPodcast: '',
-    // Audience
     socialPlatform: '',
     followers: '',
-    // Your Value
     topic1: '',
     topic2: '',
     topic3: '',
     uniqueAngle: '',
     audienceBenefit: '',
   });
+  const [pitches, setPitches] = useState<PitchResponse['pitches'] | null>(null);
+  const [generationTime, setGenerationTime] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
 
   const updateFormData = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const calculatePitchScore = () => {
+  const calculatePitchScore = (): number => {
     let score = 0;
-    const maxScore = 100;
     
     // About You
     if (formData.name) score += 5;
@@ -65,17 +99,60 @@ export default function Home() {
     if (formData.socialPlatform) score += 5;
     if (formData.followers) score += 10;
     
-    return Math.min(score, maxScore);
+    return Math.min(score, 100);
   };
 
   const score = calculatePitchScore();
 
-  const nextStep = () => {
-    const steps: Step[] = ['about-you', 'about-podcast', 'audience', 'your-value', 'generating'];
-    const currentIndex = steps.indexOf(step);
-    if (currentIndex < steps.length - 1) {
-      setStep(steps[currentIndex + 1]);
+  const generatePitches = async () => {
+    setStep('generating');
+    setError(null);
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data: PitchResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate pitches');
+      }
+
+      if (data.success && data.pitches) {
+        setPitches(data.pitches);
+        setGenerationTime(data.generationTimeMs);
+        setStep('results');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setStep('your-value');
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      title: '',
+      expertise: '',
+      credibility: '',
+      podcastName: '',
+      hostName: '',
+      guestName: '',
+      episodeTopic: '',
+      whyPodcast: '',
+      socialPlatform: '',
+      followers: '',
+      topic1: '',
+      topic2: '',
+      topic3: '',
+      uniqueAngle: '',
+      audienceBenefit: '',
+    });
+    setPitches(null);
+    setStep('about-you');
   };
 
   const renderStep = () => {
@@ -85,7 +162,7 @@ export default function Home() {
           <AboutYou 
             formData={formData} 
             updateFormData={updateFormData}
-            onNext={nextStep}
+            onNext={() => setStep('about-podcast')}
           />
         );
       case 'about-podcast':
@@ -93,7 +170,7 @@ export default function Home() {
           <AboutPodcast 
             formData={formData} 
             updateFormData={updateFormData}
-            onNext={nextStep}
+            onNext={() => setStep('audience')}
             onBack={() => setStep('about-you')}
           />
         );
@@ -102,7 +179,7 @@ export default function Home() {
           <Audience 
             formData={formData} 
             updateFormData={updateFormData}
-            onNext={nextStep}
+            onNext={() => setStep('your-value')}
             onBack={() => setStep('about-podcast')}
           />
         );
@@ -111,7 +188,7 @@ export default function Home() {
           <YourValue 
             formData={formData} 
             updateFormData={updateFormData}
-            onNext={nextStep}
+            onNext={generatePitches}
             onBack={() => setStep('audience')}
           />
         );
@@ -124,6 +201,17 @@ export default function Home() {
             </h2>
             <p className="mt-2 text-gray-600">This usually takes 3-5 seconds</p>
           </div>
+        );
+      case 'results':
+        if (!pitches) return null;
+        return (
+          <Results 
+            pitches={pitches}
+            formData={formData}
+            emailSubmitted={emailSubmitted}
+            onEmailSubmit={() => setEmailSubmitted(true)}
+            onGenerateAnother={resetForm}
+          />
         );
       default:
         return null;
@@ -178,6 +266,15 @@ export default function Home() {
         <div className="bg-white border-b border-gray-200 py-3">
           <div className="max-w-3xl mx-auto px-6">
             <PitchScore formData={formData} score={score} />
+          </div>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="max-w-3xl mx-auto px-6 mt-6">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
           </div>
         </div>
       )}
