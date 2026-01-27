@@ -41,76 +41,113 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
       <div className="space-y-6">
         {/* Podcast Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="podcast-name-input"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Podcast name *
           </label>
           <input
+            id="podcast-name-input"
             type="text"
             value={formData.podcastName}
             onChange={(e) => updateFormData('podcastName', e.target.value)}
             placeholder="SaaS Growth Podcast"
+            aria-required="true"
+            aria-invalid={!formData.podcastName}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
         </div>
 
         {/* Host Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="host-name-input"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Host name *
           </label>
           <input
+            id="host-name-input"
             type="text"
             value={formData.hostName}
             onChange={(e) => updateFormData('hostName', e.target.value)}
             placeholder="Mike Anderson"
+            aria-required="true"
+            aria-invalid={!formData.hostName}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
         </div>
 
         {/* Recent Guest */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="guest-name-input"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             A guest you enjoyed listening to *
           </label>
           <input
+            id="guest-name-input"
             type="text"
             value={formData.guestName}
             onChange={(e) => updateFormData('guestName', e.target.value)}
             placeholder="Jason Lemkin"
+            aria-required="true"
+            aria-invalid={!formData.guestName}
+            aria-describedby="guest-name-helper"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p id="guest-name-helper" className="text-sm text-gray-500 mt-1">
             Name a guest from a recent episode. This proves you actually listen.
           </p>
         </div>
 
         {/* Episode Topic */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="episode-topic-input"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             What did they discuss? *
           </label>
           <input
+            id="episode-topic-input"
             type="text"
             value={formData.episodeTopic}
             onChange={(e) => updateFormData('episodeTopic', e.target.value)}
             placeholder="How to hire your first VP of Sales"
+            aria-required="true"
+            aria-invalid={formData.episodeTopic.length < 10}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
         </div>
 
         {/* Why This Podcast */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="why-podcast-textarea"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Why do you want to be on THIS podcast? *
           </label>
           <textarea
+            id="why-podcast-textarea"
             value={formData.whyPodcast}
-            onChange={(e) => updateFormData('whyPodcast', e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= 280) {
+                updateFormData('whyPodcast', e.target.value);
+              }
+            }}
             placeholder="Love the tactical depth, no fluff. Your episodes on pricing strategies were game-changing for our team."
             rows={4}
+            maxLength={280}
+            aria-required="true"
+            aria-invalid={formData.whyPodcast.length < 50}
+            aria-describedby="why-podcast-helper"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p id="why-podcast-helper" className="text-sm text-gray-500 mt-1">
             {formData.whyPodcast.length}/280 characters
           </p>
         </div>

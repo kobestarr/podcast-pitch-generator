@@ -41,40 +41,60 @@ export function AboutYou({ formData, updateFormData, onNext }: Props) {
       <div className="space-y-6">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="name-input"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Your name *
           </label>
           <input
+            id="name-input"
             type="text"
             value={formData.name}
             onChange={(e) => updateFormData('name', e.target.value)}
             placeholder="Sarah Chen"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
+            aria-required="true"
+            aria-invalid={!formData.name}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all ${
+              !formData.name ? 'border-gray-300' : 'border-gray-300'
+            }`}
           />
         </div>
 
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="title-input"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Your title/role *
           </label>
           <input
+            id="title-input"
             type="text"
             value={formData.title}
             onChange={(e) => updateFormData('title', e.target.value)}
             placeholder="CEO at GrowthLab"
+            aria-required="true"
+            aria-invalid={!formData.title}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
         </div>
 
         {/* Expertise */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="expertise-select"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Your area of expertise *
           </label>
           <select
+            id="expertise-select"
             value={formData.expertise}
             onChange={(e) => updateFormData('expertise', e.target.value)}
+            aria-required="true"
+            aria-invalid={!formData.expertise}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all bg-white"
           >
             <option value="">Select your expertise...</option>
@@ -86,17 +106,29 @@ export function AboutYou({ formData, updateFormData, onNext }: Props) {
 
         {/* Credibility */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label 
+            htmlFor="credibility-textarea"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Your biggest credibility point *
           </label>
           <textarea
+            id="credibility-textarea"
             value={formData.credibility}
-            onChange={(e) => updateFormData('credibility', e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= 500) {
+                updateFormData('credibility', e.target.value);
+              }
+            }}
             placeholder="Your biggest achievement, company, or social proof. E.g., 'Scaled 3 SaaS companies from $1M to $10M ARR'"
             rows={3}
+            maxLength={500}
+            aria-required="true"
+            aria-invalid={formData.credibility.length < 20}
+            aria-describedby="credibility-helper"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p id="credibility-helper" className="text-sm text-gray-500 mt-1">
             {formData.credibility.length}/500 characters
           </p>
         </div>
