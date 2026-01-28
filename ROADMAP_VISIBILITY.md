@@ -65,6 +65,7 @@
 - Store form data + email
 - Unlock follow-ups after email submission
 - Database/CRM connection established
+- **📋 Implementation details saved in `SLICE_5_IMPLEMENTATION.md`**
 
 **Slice 6 - Retargeting + Analytics**
 - Track email submissions

@@ -53,6 +53,7 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeError, setCodeError] = useState<string | null>(null);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   const copyToClipboard = async (text: string, id: string) => {
     try {
@@ -116,7 +117,14 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
       if (data.verified) {
         setEmailVerified(true);
         setVerificationStep('verified');
+        setShowEmailModal(false);
         onEmailSubmit();
+        // Unlock pitches 2 and 3
+        if (activePitch === 2 || activePitch === 3) {
+          // Keep current selection
+        } else {
+          // User was viewing pitch 1, keep it
+        }
       }
     } catch (err) {
       setCodeError(err instanceof Error ? err.message : 'Invalid code. Please try again.');
@@ -125,19 +133,174 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
     }
   };
 
-  // Only allow viewing pitch_1 if not verified, otherwise show selected pitch
-  const canViewPitch = activePitch === 1 || emailVerified;
   const currentPitch = activePitch === 1 ? pitches.pitch_1 : activePitch === 2 ? pitches.pitch_2 : pitches.pitch_3;
-  
-  // If user tries to select locked pitch, default to pitch_1
-  useEffect(() => {
-    if (!emailVerified && (activePitch === 2 || activePitch === 3)) {
-      setActivePitch(1);
-    }
-  }, [emailVerified, activePitch]);
 
   return (
     <div>
+      {/* Email Gate Modal */}
+      {showEmailModal && !emailVerified && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Close Button */}
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-semibold text-dealflow-midnight">
+                  Unlock All Pitch Versions
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowEmailModal(false);
+                    setEmailError(null);
+                    setCodeError(null);
+                    // Reset to pitch 1 if not verified
+                    if (!emailVerified && (activePitch === 2 || activePitch === 3)) {
+                      setActivePitch(1);
+                    }
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Bonuses List */}
+              <div className="mb-6">
+                <p className="text-gray-600 mb-4">Verify your email to unlock:</p>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-600 mt-0.5">✅</span>
+                    <span className="text-gray-700">Access to <strong>Social Proof</strong> pitch version</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-600 mt-0.5">✅</span>
+                    <span className="text-gray-700">Access to <strong>Casual & Mobile</strong> pitch version</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-600 mt-0.5">✅</span>
+                    <span className="text-gray-700"><strong>3 follow-up email templates</strong> (5-7 days, 10-14 days, 21 days)</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-600 mt-0.5">✅</span>
+                    <span className="text-gray-700"><strong>Bonus PDF cheat sheet</strong> - Podcast Research Guide</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-600 mt-0.5">✅</span>
+                    <span className="text-gray-700">Content Catalyst newsletter subscription (unsubscribe anytime)</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Email Verification Form */}
+              {verificationStep === 'email' && (
+                <form onSubmit={requestVerificationCode}>
+                  <div className="flex gap-3 mb-3">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      required
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent"
+                    />
+                    <button
+                      type="submit"
+                      disabled={emailLoading}
+                      className="px-6 py-3 bg-dealflow-teal text-white font-semibold rounded-lg hover:bg-dealflow-midnight transition-all disabled:opacity-50"
+                    >
+                      {emailLoading ? 'Sending...' : 'Send Code'}
+                    </button>
+                  </div>
+                  {emailError && (
+                    <p className="text-red-500 text-sm mb-3">{emailError}</p>
+                  )}
+                </form>
+              )}
+
+              {verificationStep === 'code' && (
+                <form onSubmit={verifyCode}>
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600 mb-3">
+                      We sent a 6-digit code to <strong>{email}</strong>. Enter it below:
+                    </p>
+                    <div className="flex gap-3">
+                      <input
+                        type="text"
+                        value={verificationCode}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          setVerificationCode(value);
+                        }}
+                        placeholder="000000"
+                        required
+                        maxLength={6}
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent text-center text-2xl font-mono tracking-widest"
+                      />
+                      <button
+                        type="submit"
+                        disabled={codeLoading || verificationCode.length !== 6}
+                        className="px-6 py-3 bg-dealflow-teal text-white font-semibold rounded-lg hover:bg-dealflow-midnight transition-all disabled:opacity-50"
+                      >
+                        {codeLoading ? 'Verifying...' : 'Verify'}
+                      </button>
+                    </div>
+                    {codeError && (
+                      <p className="text-red-500 text-sm mt-2">{codeError}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVerificationStep('email');
+                        setCodeError(null);
+                        setVerificationCode('');
+                      }}
+                      className="text-sm text-gray-500 hover:text-gray-700 mt-2"
+                    >
+                      ← Use a different email
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {verificationStep === 'verified' && (
+                <div className="text-center py-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xl font-semibold text-dealflow-midnight mb-2">
+                    Email Verified! ✅
+                  </h4>
+                  <p className="text-gray-600 mb-4">
+                    You now have access to all pitches and follow-up templates.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowEmailModal(false);
+                      setActiveTab('pitches');
+                      // Switch to the pitch they wanted to see
+                      if (activePitch === 2 || activePitch === 3) {
+                        // Already set, keep it
+                      } else {
+                        setActivePitch(2); // Default to Social Proof after verification
+                      }
+                    }}
+                    className="px-6 py-3 bg-dealflow-teal text-white font-semibold rounded-lg hover:bg-dealflow-midnight transition-all"
+                  >
+                    View All Pitches →
+                  </button>
+                </div>
+              )}
+
+              <p className="text-xs text-gray-500 mt-4 text-center">
+                We'll add you to our Content Catalyst newsletter. Unsubscribe anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Success Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
@@ -204,7 +367,7 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  Social Proof
+                  See Social Proof version
                 </button>
                 <button
                   onClick={() => setActivePitch(3)}
@@ -214,42 +377,37 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  Casual & Mobile
+                  See Casual and Mobile Version
                 </button>
               </>
             ) : (
               <>
                 <button
-                  disabled
-                  className="flex-1 py-3 px-4 rounded-lg font-medium bg-gray-100 text-gray-400 cursor-not-allowed relative"
+                  onClick={() => {
+                    setShowEmailModal(true);
+                    setActivePitch(2); // Set desired pitch for after verification
+                  }}
+                  className="flex-1 py-3 px-4 rounded-lg font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all relative"
                   title="Verify your email to unlock"
                 >
-                  Social Proof
+                  See Social Proof version
                   <span className="absolute top-1 right-1 text-xs">🔒</span>
                 </button>
                 <button
-                  disabled
-                  className="flex-1 py-3 px-4 rounded-lg font-medium bg-gray-100 text-gray-400 cursor-not-allowed relative"
+                  onClick={() => {
+                    setShowEmailModal(true);
+                    setActivePitch(3); // Set desired pitch for after verification
+                  }}
+                  className="flex-1 py-3 px-4 rounded-lg font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all relative"
                   title="Verify your email to unlock"
                 >
-                  Casual & Mobile
+                  See Casual and Mobile Version
                   <span className="absolute top-1 right-1 text-xs">🔒</span>
                 </button>
               </>
             )}
           </div>
 
-          {/* Show verification gate if pitch 2 or 3 is selected but not verified */}
-          {!emailVerified && (activePitch === 2 || activePitch === 3) && (
-            <div className="mb-6 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-yellow-800 font-medium mb-2">
-                🔒 Verify your email to unlock this pitch
-              </p>
-              <p className="text-sm text-yellow-700">
-                Enter your email below to get access to the Social Proof and Casual & Mobile pitch variations.
-              </p>
-            </div>
-          )}
 
           {/* Pitch Display - Only show pitch 1 initially, others require verification */}
           {activePitch === 1 || emailVerified ? (
