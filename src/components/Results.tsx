@@ -3,8 +3,9 @@
 import { useState } from 'react';
 
 interface FormData {
-  name: string;
-  title: string;
+  firstName: string;
+  lastName: string;
+  title: string[];
   expertise: string;
   credibility: string;
   podcastName: string;

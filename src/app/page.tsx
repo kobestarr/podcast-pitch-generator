@@ -12,8 +12,9 @@ import { calculatePitchScore, type FormData as ScoringFormData } from '@/lib/sco
 type Step = 'about-you' | 'about-podcast' | 'audience' | 'your-value' | 'generating' | 'results';
 
 interface FormData {
-  name: string;
-  title: string;
+  firstName: string;
+  lastName: string;
+  title: string[];
   expertise: string;
   credibility: string;
   podcastName: string;
@@ -48,8 +49,9 @@ interface PitchResponse {
 export default function Home() {
   const [step, setStep] = useState<Step>('about-you');
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    title: '',
+    firstName: '',
+    lastName: '',
+    title: [],
     expertise: '',
     credibility: '',
     podcastName: '',
@@ -88,9 +90,28 @@ export default function Home() {
         body: JSON.stringify(formData),
       });
 
-      const data: PitchResponse = await response.json();
+      // Check content-type before parsing
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text.substring(0, 200));
+        throw new Error('Server returned an invalid response. Please try again.');
+      }
+
+      let data: PitchResponse;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Failed to parse server response. Please try again.');
+      }
 
       if (!response.ok) {
+        // Handle validation errors with score information
+        if (response.status === 400 && data.errors) {
+          const errorMessage = data.message || data.error || 'Please complete more fields';
+          throw new Error(errorMessage);
+        }
         throw new Error(data.error || 'Failed to generate pitches');
       }
 
@@ -98,17 +119,25 @@ export default function Home() {
         setPitches(data.pitches);
         setGenerationTime(data.generationTimeMs);
         setStep('results');
+      } else {
+        throw new Error('Unexpected response format');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      // Handle network errors
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      }
       setStep('your-value');
     }
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      title: '',
+      firstName: '',
+      lastName: '',
+      title: [],
       expertise: '',
       credibility: '',
       podcastName: '',
@@ -206,21 +235,35 @@ export default function Home() {
       {step !== 'generating' && step !== 'results' && (
         <div className="bg-white border-b border-gray-200 py-4">
           <div className="max-w-3xl mx-auto px-6">
-            <div className="flex items-center justify-between text-sm">
-              <span className={step === 'about-you' ? 'text-dealflow-teal font-medium' : 'text-gray-400'}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-600">
+                {step === 'about-you' && 'Step 1 of 4: About You'}
+                {step === 'about-podcast' && 'Step 2 of 4: About the Podcast'}
+                {step === 'audience' && 'Step 3 of 4: Your Audience'}
+                {step === 'your-value' && 'Step 4 of 4: Your Value'}
+              </span>
+              <span className="text-sm text-gray-500">
+                {step === 'about-you' && '1/4'}
+                {step === 'about-podcast' && '2/4'}
+                {step === 'audience' && '3/4'}
+                {step === 'your-value' && '4/4'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className={step === 'about-you' ? 'text-dealflow-teal font-medium' : step === 'about-podcast' || step === 'audience' || step === 'your-value' ? 'text-gray-400' : 'text-gray-400'}>
                 1. About You
               </span>
-              <span className={step === 'about-podcast' ? 'text-dealflow-teal font-medium' : 'text-gray-400'}>
+              <span className={step === 'about-podcast' ? 'text-dealflow-teal font-medium' : step === 'audience' || step === 'your-value' ? 'text-gray-400' : 'text-gray-400'}>
                 2. Podcast
               </span>
-              <span className={step === 'audience' ? 'text-dealflow-teal font-medium' : 'text-gray-400'}>
+              <span className={step === 'audience' ? 'text-dealflow-teal font-medium' : step === 'your-value' ? 'text-gray-400' : 'text-gray-400'}>
                 3. Audience
               </span>
               <span className={step === 'your-value' ? 'text-dealflow-teal font-medium' : 'text-gray-400'}>
                 4. Value
               </span>
             </div>
-            <div className="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-dealflow-teal transition-all duration-300"
                 style={{ 
@@ -247,7 +290,19 @@ export default function Home() {
       {error && (
         <div className="max-w-3xl mx-auto px-6 mt-6">
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
+            <div className="flex items-start gap-2">
+              <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="font-medium">{error}</p>
+                {error.includes('strength') && (
+                  <p className="text-sm mt-2 text-red-600">
+                    Check the pitch strength meter above to see which fields need completion.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

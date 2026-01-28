@@ -15,6 +15,20 @@ interface Props {
   onBack: () => void;
 }
 
+const episodeTopicExamples = [
+  'How to hire your first VP of Sales',
+  'Why most SaaS companies get pricing wrong',
+  'Building a $10M ARR business without VC funding',
+  'The psychology of customer retention',
+  'Scaling from $1M to $10M ARR',
+];
+
+const whyPodcastExamples = [
+  'Love the tactical depth, no fluff. Your episodes on pricing strategies were game-changing for our team.',
+  'Your interviews with bootstrapped founders resonate with our journey. Would love to share our story.',
+  'The way you break down complex topics makes them actionable. I have a unique angle on [topic] that would fit perfectly.',
+];
+
 export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props) {
   const isValid = formData.podcastName && formData.hostName && formData.guestName && 
                   formData.episodeTopic.length >= 10 && formData.whyPodcast.length >= 50;
@@ -52,7 +66,7 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             type="text"
             value={formData.podcastName}
             onChange={(e) => updateFormData('podcastName', e.target.value)}
-            placeholder="SaaS Growth Podcast"
+            placeholder="Flixwatcher Podcast"
             aria-required="true"
             aria-invalid={!formData.podcastName}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
@@ -65,14 +79,14 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             htmlFor="host-name-input"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Host name *
+            Host first name *
           </label>
           <input
             id="host-name-input"
             type="text"
             value={formData.hostName}
             onChange={(e) => updateFormData('hostName', e.target.value)}
-            placeholder="Mike Anderson"
+            placeholder="Mike"
             aria-required="true"
             aria-invalid={!formData.hostName}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
@@ -92,7 +106,7 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             type="text"
             value={formData.guestName}
             onChange={(e) => updateFormData('guestName', e.target.value)}
-            placeholder="Jason Lemkin"
+            placeholder="Kobi Omenaka"
             aria-required="true"
             aria-invalid={!formData.guestName}
             aria-describedby="guest-name-helper"
@@ -121,6 +135,19 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             aria-invalid={formData.episodeTopic.length < 10}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
+          <div className="mt-2 space-y-1">
+            <p className="text-xs font-medium text-gray-600">Examples:</p>
+            {episodeTopicExamples.map((example, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => updateFormData('episodeTopic', example)}
+                className="block w-full text-left text-xs text-gray-600 hover:text-dealflow-teal px-2 py-1 rounded hover:bg-gray-50 transition-colors"
+              >
+                "{example}"
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Why This Podcast */}
@@ -148,8 +175,21 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
           <p id="why-podcast-helper" className="text-sm text-gray-500 mt-1">
-            {formData.whyPodcast.length}/280 characters
+            {formData.whyPodcast.length}/280 characters (minimum 50)
           </p>
+          <div className="mt-2 space-y-1">
+            <p className="text-xs font-medium text-gray-600">Examples:</p>
+            {whyPodcastExamples.map((example, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => updateFormData('whyPodcast', example)}
+                className="block w-full text-left text-xs text-gray-600 hover:text-dealflow-teal px-2 py-1 rounded hover:bg-gray-50 transition-colors"
+              >
+                "{example}"
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

@@ -8,8 +8,9 @@
  */
 
 export interface FormData {
-  name: string;
-  title: string;
+  firstName: string;
+  lastName: string;
+  title: string[];
   expertise: string;
   credibility: string;
   podcastName: string;
@@ -70,30 +71,39 @@ export interface ScoringRule {
 }
 
 /**
- * Complete scoring rules for all 15 fields
- * Total possible points: 140
+ * Complete scoring rules for all 16 fields
+ * Total possible points: 145
  *
  * PRD Section: F2, F2b, F3 - Input Form Requirements
  */
 export const SCORING_RULES: ScoringRule[] = [
-  // ===== ABOUT YOU SECTION (35 points) =====
+  // ===== ABOUT YOU SECTION (40 points) =====
   {
-    field: 'name',
-    label: 'Name',
+    field: 'firstName',
+    label: 'First Name',
     points: 5,
-    validate: (data) => !!data.name.trim(),
+    validate: (data) => !!data.firstName.trim(),
     isOptional: false,
     isRecommended: false,
-    hint: 'Your full name',
+    hint: 'Your first name',
+  },
+  {
+    field: 'lastName',
+    label: 'Last Name',
+    points: 5,
+    validate: (data) => !!data.lastName.trim(),
+    isOptional: false,
+    isRecommended: false,
+    hint: 'Your last name',
   },
   {
     field: 'title',
     label: 'Title/Role',
     points: 5,
-    validate: (data) => !!data.title.trim(),
+    validate: (data) => Array.isArray(data.title) && data.title.length > 0,
     isOptional: false,
     isRecommended: false,
-    hint: 'Your professional title',
+    hint: 'Your professional title(s)',
   },
   {
     field: 'expertise',

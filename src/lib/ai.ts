@@ -228,13 +228,32 @@ async function generateWithClaude(inputs: PitchInputs): Promise<PitchOutputs> {
 
   const text = content.text;
   
-  // Extract JSON from response
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  // Extract JSON from response (handle code blocks)
+  let jsonMatch = text.match(/\{[\s\S]*\}/);
+  
+  // If wrapped in markdown code blocks, extract from there
   if (!jsonMatch) {
-    throw new Error('Could not extract JSON from Claude response');
+    const codeBlockMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+    if (codeBlockMatch) {
+      jsonMatch = [codeBlockMatch[1]];
+    }
+  }
+  
+  if (!jsonMatch) {
+    throw new Error('Could not extract JSON from Claude response. Response may be malformed.');
   }
 
-  return JSON.parse(jsonMatch[0]) as PitchOutputs;
+  let parsed: PitchOutputs;
+  try {
+    parsed = JSON.parse(jsonMatch[0]) as PitchOutputs;
+  } catch (parseError) {
+    throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+  }
+
+  // Validate required fields
+  validatePitchOutputs(parsed);
+
+  return parsed;
 }
 
 // Generate with OpenAI GPT-4
@@ -260,21 +279,68 @@ async function generateWithGPT4(inputs: PitchInputs): Promise<PitchOutputs> {
     throw new Error('No content in OpenAI response');
   }
 
-  // Extract JSON from response
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  // Extract JSON from response (handle code blocks)
+  let jsonMatch = content.match(/\{[\s\S]*\}/);
+  
+  // If wrapped in markdown code blocks, extract from there
   if (!jsonMatch) {
-    throw new Error('Could not extract JSON from OpenAI response');
+    const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+    if (codeBlockMatch) {
+      jsonMatch = [codeBlockMatch[1]];
+    }
+  }
+  
+  if (!jsonMatch) {
+    throw new Error('Could not extract JSON from OpenAI response. Response may be malformed.');
   }
 
-  return JSON.parse(jsonMatch[0]) as PitchOutputs;
+  let parsed: PitchOutputs;
+  try {
+    parsed = JSON.parse(jsonMatch[0]) as PitchOutputs;
+  } catch (parseError) {
+    throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+  }
+
+  // Validate required fields
+  validatePitchOutputs(parsed);
+
+  return parsed;
+}
+
+// Validate pitch outputs structure
+function validatePitchOutputs(outputs: any): asserts outputs is PitchOutputs {
+  const requiredPitches = ['pitch_1', 'pitch_2', 'pitch_3'];
+  const requiredFollowups = ['followup_1', 'followup_2', 'followup_3'];
+
+  for (const pitch of requiredPitches) {
+    if (!outputs[pitch] || !outputs[pitch].subject || !outputs[pitch].body) {
+      throw new Error(`Missing required field: ${pitch}.subject or ${pitch}.body`);
+    }
+  }
+
+  for (const followup of requiredFollowups) {
+    if (!outputs[followup] || !outputs[followup].subject || !outputs[followup].body) {
+      throw new Error(`Missing required field: ${followup}.subject or ${followup}.body`);
+    }
+  }
 }
 
 // Main generation function - uses configured provider
 export async function generatePitches(inputs: PitchInputs): Promise<PitchOutputs> {
-  if (AI_PROVIDER === 'anthropic') {
-    return generateWithClaude(inputs);
+  try {
+    if (AI_PROVIDER === 'anthropic') {
+      return await generateWithClaude(inputs);
+    }
+    return await generateWithGPT4(inputs);
+  } catch (error: any) {
+    // Re-throw with more context if it's not already a descriptive error
+    if (error?.message && !error.message.includes('extract JSON') && !error.message.includes('parse JSON')) {
+      throw error;
+    }
+    
+    // Wrap parsing errors with more context
+    throw new Error(`AI response validation failed: ${error?.message || 'Unknown error'}`);
   }
-  return generateWithGPT4(inputs);
 }
 
 // Provider info for debugging

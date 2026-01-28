@@ -15,6 +15,32 @@ interface Props {
   onBack: () => void;
 }
 
+const topicExamples = [
+  'Why most SaaS companies get pricing wrong',
+  'How to hire your first VP of Sales',
+  'Building a $10M ARR business without VC funding',
+  'The psychology of customer retention',
+  'Scaling from $1M to $10M ARR',
+  'Why product-led growth beats sales-led growth',
+  'The hidden costs of raising VC funding',
+  'How to build a content engine that drives revenue',
+];
+
+const uniqueAngleExamples = [
+  "I've seen the same pricing mistakes at 3 different SaaS companies. Here's what actually works...",
+  'After analyzing 500+ SaaS companies, I found the one metric that predicts success.',
+  "I bootstrapped to $10M ARR without a sales team. Here's how product-led growth changed everything.",
+  "Most founders think they need VC funding. I built 3 companies without it. Here's why...",
+];
+
+const audienceBenefitExamples = [
+  'Early-stage SaaS founders figuring out their growth motion, typically $500K-$5M ARR',
+  'B2B founders who are struggling with pricing and want to maximize revenue',
+  'First-time founders who are considering raising VC funding',
+  'SaaS founders who want to build a product-led growth engine',
+  'Marketing leaders who are building content engines that drive revenue',
+];
+
 export function YourValue({ formData, updateFormData, onNext, onBack }: Props) {
   const isValid = formData.topic1 && formData.uniqueAngle.length >= 30;
 
@@ -71,6 +97,29 @@ export function YourValue({ formData, updateFormData, onNext, onBack }: Props) {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
             />
           </div>
+          <div className="mt-2 space-y-1">
+            <p className="text-xs font-medium text-gray-600">Examples:</p>
+            <div className="flex flex-wrap gap-2">
+              {topicExamples.map((example, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    if (!formData.topic1) {
+                      updateFormData('topic1', example);
+                    } else if (!formData.topic2) {
+                      updateFormData('topic2', example);
+                    } else if (!formData.topic3) {
+                      updateFormData('topic3', example);
+                    }
+                  }}
+                  className="text-xs text-gray-600 hover:text-dealflow-teal px-2 py-1 rounded hover:bg-gray-50 transition-colors border border-gray-200 hover:border-dealflow-teal"
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Unique Angle */}
@@ -95,8 +144,21 @@ export function YourValue({ formData, updateFormData, onNext, onBack }: Props) {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
           <p id="unique-angle-helper" className="text-sm text-gray-500 mt-1">
-            {formData.uniqueAngle.length}/500 characters
+            {formData.uniqueAngle.length}/500 characters (minimum 30)
           </p>
+          <div className="mt-2 space-y-1">
+            <p className="text-xs font-medium text-gray-600">Examples:</p>
+            {uniqueAngleExamples.map((example, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => updateFormData('uniqueAngle', example)}
+                className="block w-full text-left text-xs text-gray-600 hover:text-dealflow-teal px-2 py-1 rounded hover:bg-gray-50 transition-colors"
+              >
+                "{example}"
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Audience Benefit */}
@@ -111,6 +173,19 @@ export function YourValue({ formData, updateFormData, onNext, onBack }: Props) {
             rows={2}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
           />
+          <div className="mt-2 space-y-1">
+            <p className="text-xs font-medium text-gray-600">Examples:</p>
+            {audienceBenefitExamples.map((example, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => updateFormData('audienceBenefit', example)}
+                className="block w-full text-left text-xs text-gray-600 hover:text-dealflow-teal px-2 py-1 rounded hover:bg-gray-50 transition-colors"
+              >
+                "{example}"
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
