@@ -149,9 +149,9 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
         throw new Error(data.error || 'Failed to send verification code');
       }
 
-      // In development, show code in alert for testing
+      // In development, show code in console for testing (if email fails)
       if (data.code && process.env.NODE_ENV === 'development') {
-        alert(`Development mode: Your verification code is ${data.code}`);
+        console.log('Development mode - Verification code:', data.code);
       }
 
       setVerificationStep('code');
@@ -171,7 +171,12 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
       const response = await fetch('/api/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: verificationCode, action: 'verify' }),
+        body: JSON.stringify({ 
+          email, 
+          code: verificationCode, 
+          action: 'verify',
+          formData: formData // Send all form data for GHL sync
+        }),
       });
 
       const data = await response.json();

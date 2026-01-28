@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Resend } from 'resend';
+import { createGHLContact } from '@/lib/ghl';
+
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // In-memory storage for verification codes (use Redis in production)
 const verificationCodes = new Map<string, { code: string; email: string; expiresAt: number }>();
@@ -46,20 +51,77 @@ export async function POST(request: NextRequest) {
         expiresAt,
       });
 
-      // TODO: Send email with code via email service (Resend, SendGrid, etc.)
-      // For now, return code in response for testing
-      // In production, remove code from response and send via email only
+      // Send verification code via Resend
+      try {
+        const { error } = await resend.emails.send({
+          from: 'Podcast Pitch Generator <onboarding@resend.dev>', // Using Resend's test domain for now
+          to: email,
+          subject: 'Your Podcast Pitch Generator Verification Code',
+          html: `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              </head>
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background: linear-gradient(135deg, #00b4a0 0%, #003d4f 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                  <h1 style="color: white; margin: 0; font-size: 24px;">Podcast Pitch Generator</h1>
+                </div>
+                <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
+                  <h2 style="color: #003d4f; margin-top: 0;">Your Verification Code</h2>
+                  <p>Enter this code to unlock all pitch variations and follow-up templates:</p>
+                  <div style="background: white; border: 2px solid #00b4a0; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+                    <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #003d4f; font-family: 'Courier New', monospace;">
+                      ${code}
+                    </div>
+                  </div>
+                  <p style="color: #666; font-size: 14px; margin-top: 20px;">
+                    This code will expire in 10 minutes. If you didn't request this code, you can safely ignore this email.
+                  </p>
+                  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+                  <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+                    This email was sent by Podcast Pitch Generator. You're receiving this because you requested a verification code.
+                  </p>
+                </div>
+              </body>
+            </html>
+          `,
+          text: `Your Podcast Pitch Generator Verification Code\n\nEnter this code to unlock all pitch variations:\n\n${code}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request this code, you can safely ignore this email.`,
+        });
 
-      return NextResponse.json({
-        success: true,
-        message: 'Verification code sent to your email',
-        // Remove this in production - code should only come via email
-        code: process.env.NODE_ENV === 'development' ? code : undefined,
-      });
+        if (error) {
+          console.error('Resend error:', error);
+          // Still return success in dev mode with code, but log the error
+          return NextResponse.json({
+            success: true,
+            message: 'Verification code sent to your email',
+            // In development, still return code if email fails
+            code: process.env.NODE_ENV === 'development' ? code : undefined,
+            error: process.env.NODE_ENV === 'development' ? `Email send failed: ${error.message}` : undefined,
+          });
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: 'Verification code sent to your email',
+          // Only return code in development for testing
+          code: process.env.NODE_ENV === 'development' ? code : undefined,
+        });
+      } catch (error: any) {
+        console.error('Failed to send verification email:', error);
+        // In development, still return code for testing
+        return NextResponse.json({
+          success: true,
+          message: 'Verification code sent to your email',
+          code: process.env.NODE_ENV === 'development' ? code : undefined,
+          error: process.env.NODE_ENV === 'development' ? `Email send failed: ${error.message}` : undefined,
+        });
+      }
     }
 
     if (action === 'verify') {
-      const { code } = body;
+      const { code, formData } = body;
 
       if (!code || typeof code !== 'string') {
         return NextResponse.json(
@@ -92,8 +154,20 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Code is valid - remove it and return success
+      // Code is valid - remove it
       verificationCodes.delete(email.toLowerCase());
+
+      // Sync contact to GHL (don't block verification if this fails)
+      if (formData) {
+        try {
+          await createGHLContact(email, formData);
+          console.log('GHL contact created successfully for:', email);
+        } catch (error: any) {
+          // Log error but don't fail verification
+          console.error('GHL sync failed (verification still succeeds):', error);
+          // Continue - verification succeeds even if GHL fails
+        }
+      }
 
       return NextResponse.json({
         success: true,
