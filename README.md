@@ -74,16 +74,16 @@ podcast-pitch-generator/
 
 ## Implementation Slices
 
-| Slice | Deliverable | Status |
-|-------|-------------|--------|
-| 1 | Static Form UI | ✅ Done |
-| 2 | Live Pitch Score | ✅ Done |
-| 3 | API + AI Generation | Next |
-| 4 | Results Display | Next |
-| 5 | Email Capture + Unlock | Next |
-| 6 | Retargeting + Analytics | Next |
-| 7 | CTAs + Email Delivery | Next |
-| 8 | Final QA + Launch | Next |
+| Slice | Deliverable | Status | Key Features |
+|-------|-------------|--------|-------------|
+| 1 | Static Form UI | ✅ Done | Multi-step form, field validation |
+| 2 | Live Pitch Score | ✅ Done | Real-time scoring, progress indicator |
+| 3 | API + AI Generation | ✅ Done | **Pitches visible!** AI generation working |
+| 4 | Results Display | 🔄 In Progress | Polish UX, download, formatting |
+| 5 | Email Capture + Unlock | ⏳ Next | **GHL Integration** - Database/CRM |
+| 6 | Retargeting + Analytics | ⏳ Next | Pixel tracking, analytics |
+| 7 | CTAs + Email Delivery | ⏳ Next | Email sending, automation |
+| 8 | Final QA + Launch | ⏳ Next | Final polish, launch prep |
 
 ## Tech Stack
 

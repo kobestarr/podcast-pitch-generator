@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { AboutYou } from '@/components/FormFields/AboutYou';
 import { AboutPodcast } from '@/components/FormFields/AboutPodcast';
 import { Audience } from '@/components/FormFields/Audience';
@@ -75,6 +75,47 @@ export default function Home() {
   const [generationTime, setGenerationTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [emailSubmitted, setEmailSubmitted] = useState(false);
+
+  // Loading messages component
+  function GeneratingPitches() {
+    const loadingMessages = [
+      "Listening to some podcasts...",
+      "Typing away...",
+      "Reading show notes...",
+      "Checking typos...",
+      "Getting your sound check ready...",
+      "Passing off podcast knowledge as my own...",
+      "Crafting the perfect subject line...",
+      "Making it sound human...",
+      "Adding just the right amount of personality...",
+      "Pretending I've listened to every episode...",
+      "Finding the perfect angle...",
+      "Writing like a real person, not an AI...",
+    ];
+
+    const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+      }, 2500); // Change message every 2.5 seconds
+
+      return () => clearInterval(interval);
+    }, []);
+
+    return (
+      <div className="text-center py-20">
+        <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-dealflow-teal border-t-transparent"></div>
+        <h2 className="mt-6 text-2xl font-semibold text-dealflow-midnight">
+          Generating your pitches...
+        </h2>
+        <p className="mt-4 text-gray-600 font-medium">
+          {loadingMessages[currentMessageIndex]}
+        </p>
+        <p className="mt-2 text-sm text-gray-500">This should take less than a minute</p>
+      </div>
+    );
+  }
 
   const updateFormData = (field: string, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -199,15 +240,7 @@ export default function Home() {
           />
         );
       case 'generating':
-        return (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-dealflow-teal border-t-transparent"></div>
-            <h2 className="mt-6 text-2xl font-semibold text-dealflow-midnight">
-              Generating your pitches...
-            </h2>
-            <p className="mt-2 text-gray-600">This usually takes 3-5 seconds</p>
-          </div>
-        );
+        return <GeneratingPitches />;
       case 'results':
         if (!pitches) return null;
         return (

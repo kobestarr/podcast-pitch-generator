@@ -197,7 +197,12 @@ export async function POST(request: NextRequest) {
     if (!process.env.ANTHROPIC_API_KEY && process.env.AI_PROVIDER !== 'openai') {
       console.error('Missing ANTHROPIC_API_KEY');
       return NextResponse.json(
-        { error: 'AI service configuration error. Please contact support.' },
+        { 
+          error: 'AI service not configured. Please set ANTHROPIC_API_KEY in your .env.local file.',
+          message: process.env.NODE_ENV === 'development' 
+            ? 'Create a .env.local file with: ANTHROPIC_API_KEY=your_key_here'
+            : 'Please configure your API key.'
+        },
         { status: 500, headers }
       );
     }

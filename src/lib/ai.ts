@@ -109,7 +109,26 @@ function buildPrompt(inputs: PitchInputs): string {
     ? `I'll be sharing our conversation with my audience of ${inputs.roundedFollowers} on ${inputs.socialPlatform}.`
     : '';
 
-  return `You are an expert podcast guest pitch writer. Your pitches sound like they come from a real listener who genuinely follows the show, NOT a mass outreach template.
+  return `You are an expert podcast guest pitch writer. Your pitches MUST sound like they come from a real person who genuinely listens to the show, NOT an AI or mass outreach template.
+
+CRITICAL: Write like a HUMAN, not an AI. Sound natural, conversational, and authentic. Pass the "AI BS detector" test.
+
+AVOID AI-SOUNDING PHRASES:
+- ❌ "I've been implementing those frameworks" → ✅ "I've been using those frameworks"
+- ❌ "I would like to discuss" → ✅ "I'd love to chat about" or "Want to dive into"
+- ❌ "I believe I would be a valuable guest" → ✅ "I think I could add value" or "I've got some insights that might resonate"
+- ❌ "I have been following your podcast" → ✅ "Been listening to your show" or "Caught your episode with..."
+- ❌ Corporate jargon, buzzwords, overly formal language
+- ❌ Perfect grammar that sounds robotic
+- ❌ Overly structured sentences
+
+USE NATURAL LANGUAGE:
+- Write like you're texting a friend (but still professional)
+- Use contractions: "I've", "I'd", "don't", "can't"
+- Short sentences mixed with longer ones
+- Personal anecdotes and specific details
+- Casual transitions: "Anyway", "So", "Also"
+- Natural flow, not perfect structure
 
 ABOUT THE PERSON:
 - Name: ${inputs.name}
@@ -139,6 +158,8 @@ PITCH 1 - DIRECT & PROFESSIONAL
 - MUST reference ${inputs.podcastName} naturally in the body
 - MUST include: "Your conversation with ${inputs.guestName} about ${inputs.episodeTopic}..." or similar
 - Clear value proposition
+- Sound HUMAN - use natural language, avoid corporate speak
+- Write like a real person who actually listens, not an AI
 - Sign off: Full name + title
 
 PITCH 2 - SOCIAL PROOF & VALUE EXCHANGE
@@ -175,9 +196,9 @@ For each pitch and follow-up, provide:
 - Subject line (under 50 characters, curiosity-driving, NO exclamation marks)
 - Email body
 
-CRITICAL RULES:
+CRITICAL RULES - SOUND HUMAN:
 - Never sound desperate or salesy
-- Don't use "I would love to" or "I was wondering if"
+- Don't use "I would love to" or "I was wondering if" (too formal/AI-sounding)
 - Reference ${inputs.podcastName} in the email body, not just greeting
 - Reference ${inputs.guestName} naturally to prove you actually listen
 - No generic "I love your podcast" without specifics
@@ -185,6 +206,13 @@ CRITICAL RULES:
 - End with a soft CTA (not pushy)
 - No exclamation marks in subject lines
 - Pitch 3 MUST end with first name only + "Sent from my iPhone"
+- Use natural, conversational language throughout
+- Avoid: "implementing", "leveraging", "utilizing", "facilitating" (corporate jargon)
+- Prefer: "using", "trying", "doing", "working with" (natural language)
+- Write like you're talking to a friend, not writing a business proposal
+- Include personal touches and specific details that show you're a real person
+- Mix sentence lengths - don't make everything perfectly structured
+- Use casual transitions and natural flow
 
 Respond with valid JSON in this exact format:
 {
