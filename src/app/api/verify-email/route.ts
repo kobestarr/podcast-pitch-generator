@@ -12,11 +12,11 @@ function generateCode(): string {
 // Clean up expired codes
 function cleanupExpiredCodes() {
   const now = Date.now();
-  for (const [key, value] of verificationCodes.entries()) {
+  verificationCodes.forEach((value, key) => {
     if (now > value.expiresAt) {
       verificationCodes.delete(key);
     }
-  }
+  });
 }
 
 // POST: Request verification code
