@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AboutYou } from '@/components/FormFields/AboutYou';
 import { AboutPodcast } from '@/components/FormFields/AboutPodcast';
 import { Audience } from '@/components/FormFields/Audience';
 import { YourValue } from '@/components/FormFields/YourValue';
 import { PitchScore } from '@/components/PitchScore';
 import { Results } from '@/components/Results';
+import { calculatePitchScore, type FormData as ScoringFormData } from '@/lib/scoring';
 
 type Step = 'about-you' | 'about-podcast' | 'audience' | 'your-value' | 'generating' | 'results';
 
@@ -73,38 +74,8 @@ export default function Home() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const calculatePitchScore = (): number => {
-    let score = 0;
-    const maxScore = 140; // PRD specifies 140 points total
-    
-    // About You
-    if (formData.name) score += 5;
-    if (formData.title) score += 5;
-    if (formData.expertise) score += 10;
-    if (formData.credibility.length > 20) score += 15;
-    
-    // About Podcast
-    if (formData.podcastName) score += 5;
-    if (formData.hostName) score += 5;
-    if (formData.guestName) score += 15;
-    if (formData.episodeTopic.length > 10) score += 10;
-    if (formData.whyPodcast.length > 50) score += 20;
-    
-    // Your Value
-    if (formData.topic1) score += 10;
-    if (formData.topic2) score += 5;
-    if (formData.topic3) score += 5;
-    if (formData.uniqueAngle.length > 30) score += 15;
-    
-    // Audience
-    if (formData.socialPlatform) score += 5;
-    if (formData.followers) score += 10;
-    
-    // Convert to percentage (140 points = 100%)
-    return Math.min(Math.round((score / maxScore) * 100), 100);
-  };
-
-  const score = calculatePitchScore();
+  // Calculate pitch score using shared scoring logic
+  const score = useMemo(() => calculatePitchScore(formData), [formData]);
 
   const generatePitches = async () => {
     setStep('generating');
