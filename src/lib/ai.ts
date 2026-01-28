@@ -4,14 +4,27 @@
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 
-// Initialize clients
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// Lazy initialization to avoid build-time errors when env vars aren't available
+let anthropic: Anthropic | null = null;
+let openai: OpenAI | null = null;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getAnthropic(): Anthropic {
+  if (!anthropic) {
+    anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+  }
+  return anthropic;
+}
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 const AI_PROVIDER = process.env.AI_PROVIDER || 'anthropic';
 
@@ -210,7 +223,7 @@ Respond with valid JSON in this exact format:
 
 // Generate with Anthropic Claude
 async function generateWithClaude(inputs: PitchInputs): Promise<PitchOutputs> {
-  const response = await anthropic.messages.create({
+  const response = await getAnthropic().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4000,
     messages: [
@@ -258,7 +271,7 @@ async function generateWithClaude(inputs: PitchInputs): Promise<PitchOutputs> {
 
 // Generate with OpenAI GPT-4
 async function generateWithGPT4(inputs: PitchInputs): Promise<PitchOutputs> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4-turbo-preview',
     messages: [
       {

@@ -32,9 +32,9 @@ interface FormData {
 }
 
 interface PitchResponse {
-  success: boolean;
-  generationTimeMs: number;
-  pitches: {
+  success?: boolean;
+  generationTimeMs?: number;
+  pitches?: {
     pitch_1: { style: string; subject: string; body: string };
     pitch_2: { style: string; subject: string; body: string };
     pitch_3: { style: string; subject: string; body: string };
@@ -44,6 +44,10 @@ interface PitchResponse {
   };
   rateLimit?: { remaining: number };
   error?: string;
+  errors?: string[];
+  message?: string;
+  score?: number;
+  incompleteFields?: string[];
 }
 
 export default function Home() {
@@ -72,7 +76,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [emailSubmitted, setEmailSubmitted] = useState(false);
 
-  const updateFormData = (field: string, value: string) => {
+  const updateFormData = (field: string, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -117,7 +121,7 @@ export default function Home() {
 
       if (data.success && data.pitches) {
         setPitches(data.pitches);
-        setGenerationTime(data.generationTimeMs);
+        setGenerationTime(data.generationTimeMs ?? 0);
         setStep('results');
       } else {
         throw new Error('Unexpected response format');

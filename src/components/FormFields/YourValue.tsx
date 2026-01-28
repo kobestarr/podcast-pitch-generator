@@ -10,7 +10,7 @@ interface FormData {
 
 interface Props {
   formData: FormData;
-  updateFormData: (field: string, value: string) => void;
+  updateFormData: (field: string, value: string | string[]) => void;
   onNext: () => void;
   onBack: () => void;
 }
