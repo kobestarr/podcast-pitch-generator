@@ -762,13 +762,16 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
               <p className="text-gray-600 mb-4 leading-relaxed">
                 Most founders send 10 pitches and give up. We send 50+ for you, handle responses, prep you, and get you booked.
               </p>
+              <p className="text-gray-700 mb-4 font-medium">
+                Want us to do it for you? Book a free 15-minute no-obligation consult.
+              </p>
               <a
-                href="https://calendly.com/dealflow-media/podcast-guest-service"
+                href="https://app.usemotion.com/meet/kobi-omenaka/Podcast-guest-outreach-generator"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block px-6 py-3 bg-dealflow-orange text-white font-semibold rounded-lg hover:bg-orange-600 transition-all duration-200 shadow-md hover:shadow-lg"
               >
-                Want us to handle this for you? →
+                Book Free Consult →
               </a>
             </div>
           </div>
