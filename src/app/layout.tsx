@@ -21,6 +21,11 @@ export const metadata = {
   title: 'Podcast Guest Pitch Generator | Write Pitches That Get Replies',
   description: 'Generate 3 personalized podcast guest pitch emails in 60 seconds. Free tool for founders and experts.',
   metadataBase: new URL('https://dealflow.media'),
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
   openGraph: {
     title: 'Podcast Guest Pitch Generator',
     description: 'Write pitches that actually get replies.',
