@@ -5,7 +5,8 @@ import {
   trackEmailVerificationStarted, 
   trackEmailVerified, 
   trackPitchDownloaded, 
-  trackPitchCopied 
+  trackPitchCopied,
+  trackCourseSignupClick
 } from '@/lib/analytics';
 
 interface FormData {
@@ -718,19 +719,42 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
           {/* Download All & CTA Section */}
           <div className="mt-6 sm:mt-8 space-y-4">
             {emailVerified && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-                <button
-                  onClick={downloadAllPitches}
-                  className="w-full px-6 py-3 bg-gray-100 text-dealflow-midnight font-semibold rounded-lg hover:bg-gray-200 transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Download All Pitches
-                </button>
-              </div>
+              <>
+                {/* Course Signup CTA - Primary */}
+                <div className="bg-gradient-to-r from-dealflow-teal to-dealflow-midnight rounded-xl p-6 sm:p-8 text-white shadow-lg">
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-2">
+                    Want to Land More Podcast Appearances?
+                  </h3>
+                  <p className="mb-4 opacity-90 leading-relaxed">
+                    Get our free 7-day podcast guesting course. Learn how to pitch, get booked, and turn appearances into clients.
+                  </p>
+                  <a
+                    href="https://v.stripped.media/7-day-podcast-guesting-course-lp?utm_source=podcast-pitch-generator&utm_medium=email-verification&utm_campaign=7-day-course-signup&utm_content=results-page"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={trackCourseSignupClick}
+                    className="inline-block px-6 py-3 bg-white text-dealflow-midnight font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Start Free Course →
+                  </a>
+                </div>
+
+                {/* Download All Pitches */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                  <button
+                    onClick={downloadAllPitches}
+                    className="w-full px-6 py-3 bg-gray-100 text-dealflow-midnight font-semibold rounded-lg hover:bg-gray-200 transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download All Pitches
+                  </button>
+                </div>
+              </>
             )}
             
+            {/* Secondary CTA - Get Help */}
             <div className="p-4 sm:p-6 bg-dealflow-cream rounded-xl border border-dealflow-teal/20 shadow-sm">
               <h3 className="font-semibold text-dealflow-midnight mb-2 text-lg">
                 Writing pitches is the easy part.

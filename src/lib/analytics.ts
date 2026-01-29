@@ -256,3 +256,31 @@ export function trackPitchCopied(pitchNumber: number) {
     console.error('Error tracking pitch copied:', error);
   }
 }
+
+/**
+ * Track when user clicks course signup button
+ */
+export function trackCourseSignupClick() {
+  try {
+    if (isMetaPixelLoaded()) {
+      window.fbq!('trackCustom', 'CourseSignupClick');
+      window.fbq!('track', 'Lead', {
+        content_name: '7-Day Podcast Guesting Course',
+        content_category: 'Course Signup',
+      });
+    }
+    if (isLinkedInLoaded()) {
+      window.lintrk!('track', { 
+        conversion_id: 'course_signup_click',
+      });
+    }
+    if (isGALoaded()) {
+      window.gtag!('event', 'course_signup_click', {
+        event_category: 'Podcast Pitch Generator',
+        event_label: '7-Day Course Signup',
+      });
+    }
+  } catch (error) {
+    console.error('Error tracking course signup click:', error);
+  }
+}
