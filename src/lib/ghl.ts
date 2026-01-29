@@ -1,6 +1,6 @@
 /**
  * Go High Level (GHL) API Integration
- * Creates contacts in GHL CRM after email verification
+ * Creates or updates contacts in GHL CRM after email verification
  */
 
 interface FormData {
@@ -36,7 +36,45 @@ interface GHLContact {
 }
 
 /**
- * Create a contact in GHL with form data
+ * Lookup contact by email in GHL
+ * @returns Contact data if found, null if not
+ */
+async function lookupContactByEmail(
+  email: string,
+  apiKey: string
+): Promise<{ id: string; tags: string[] } | null> {
+  try {
+    const response = await fetch(
+      `https://rest.gohighlevel.com/v1/contacts/lookup?email=${encodeURIComponent(email)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    const contact = data.contacts?.[0];
+    if (!contact) return null;
+
+    return {
+      id: contact.id,
+      tags: contact.tags || [],
+    };
+  } catch (error) {
+    console.error('Error looking up contact:', error);
+    return null;
+  }
+}
+
+/**
+ * Create or update a contact in GHL with form data (upsert)
  * @param email - Verified email address
  * @param formData - All form data from the pitch generator
  */
@@ -112,19 +150,47 @@ export async function createGHLContact(
     source: 'Podcast Pitch Generator',
   };
 
+  const headers = {
+    'Authorization': `Bearer ${apiKey}`,
+    'Content-Type': 'application/json',
+  };
+
   try {
-    const response = await fetch(
-      `https://services.leadconnectorhq.com/contacts/`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'Version': '2021-07-28',
-        },
-        body: JSON.stringify(contact),
-      }
-    );
+    // Check if contact already exists
+    const existingContact = await lookupContactByEmail(email, apiKey);
+
+    let response: Response;
+
+    if (existingContact) {
+      // UPDATE existing contact - merge tags with existing ones
+      console.log('Updating existing GHL contact:', existingContact.id);
+
+      // Merge new tags with existing tags (avoid duplicates)
+      const mergedTags = Array.from(new Set([...existingContact.tags, ...tags]));
+
+      response = await fetch(
+        `https://rest.gohighlevel.com/v1/contacts/${existingContact.id}`,
+        {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            ...contact,
+            tags: mergedTags,
+          }),
+        }
+      );
+    } else {
+      // CREATE new contact
+      console.log('Creating new GHL contact for:', email);
+      response = await fetch(
+        `https://rest.gohighlevel.com/v1/contacts/`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(contact),
+        }
+      );
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -134,10 +200,9 @@ export async function createGHLContact(
     }
 
     const result = await response.json();
-    console.log('GHL contact created successfully:', result.contact?.id || result.id);
+    console.log('GHL contact saved successfully:', result.contact?.id || result.id || existingContact?.id);
   } catch (error) {
-    // Log error but don't throw - we don't want to block email verification
-    console.error('Failed to create GHL contact:', error);
-    throw error; // Re-throw so caller can log it, but verification will still succeed
+    console.error('Failed to save GHL contact:', error);
+    throw error;
   }
 }
