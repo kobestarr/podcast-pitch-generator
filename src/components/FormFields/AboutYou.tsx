@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 interface FormData {
   firstName: string;
   lastName: string;
@@ -55,6 +57,7 @@ const credibilityExamples = [
 ];
 
 export function AboutYou({ formData, updateFormData, onNext }: Props) {
+  const [clickedCredibilityExample, setClickedCredibilityExample] = useState<number | null>(null);
   const isValid = formData.firstName && formData.lastName && formData.title.length > 0 && formData.expertise && formData.credibility.length >= 20;
 
   const toggleTitle = (title: string) => {
@@ -67,96 +70,93 @@ export function AboutYou({ formData, updateFormData, onNext }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-      <h2 className="text-2xl font-semibold text-dealflow-midnight mb-2">
+    <div className="bg-white rounded-2xl shadow-lg border border-dealflow-light-grey/30 p-10 transition-all duration-300 hover:shadow-xl">
+      <h2 className="text-3xl font-heading font-bold text-dealflow-midnight mb-2">
         Tell us about yourself
       </h2>
-      <p className="text-gray-600 mb-8">
+      <p className="text-lg font-body text-dealflow-light-grey mb-6">
         This helps us understand your credibility and expertise.
       </p>
 
-      <div className="space-y-6">
-        {/* First Name */}
-        <div>
-          <label 
-            htmlFor="first-name-input"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            First name *
-          </label>
-          <input
-            id="first-name-input"
-            type="text"
-            value={formData.firstName}
-            onChange={(e) => updateFormData('firstName', e.target.value)}
-            placeholder="Sarah"
-            aria-required="true"
-            aria-invalid={!formData.firstName}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all ${
-              !formData.firstName ? 'border-gray-300' : 'border-gray-300'
-            }`}
-          />
-        </div>
+      <div className="space-y-4">
+        {/* First Name and Last Name - Side by Side */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label 
+              htmlFor="first-name-input"
+              className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
+            >
+              First name *
+            </label>
+            <input
+              id="first-name-input"
+              type="text"
+              value={formData.firstName}
+              onChange={(e) => updateFormData('firstName', e.target.value)}
+              placeholder="Sarah"
+              aria-required="true"
+              aria-invalid={!formData.firstName}
+              className="w-full px-4 py-2 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-dealflow-midnight placeholder:text-dealflow-light-grey"
+            />
+          </div>
 
-        {/* Last Name */}
-        <div>
-          <label 
-            htmlFor="last-name-input"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Last name *
-          </label>
-          <input
-            id="last-name-input"
-            type="text"
-            value={formData.lastName}
-            onChange={(e) => updateFormData('lastName', e.target.value)}
-            placeholder="Chen"
-            aria-required="true"
-            aria-invalid={!formData.lastName}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all ${
-              !formData.lastName ? 'border-gray-300' : 'border-gray-300'
-            }`}
-          />
+          <div>
+            <label 
+              htmlFor="last-name-input"
+              className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
+            >
+              Last name *
+            </label>
+            <input
+              id="last-name-input"
+              type="text"
+              value={formData.lastName}
+              onChange={(e) => updateFormData('lastName', e.target.value)}
+              placeholder="Chen"
+              aria-required="true"
+              aria-invalid={!formData.lastName}
+              className="w-full px-4 py-2 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-dealflow-midnight placeholder:text-dealflow-light-grey"
+            />
+          </div>
         </div>
 
         {/* Title - Multi-Select */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-base font-body font-semibold text-dealflow-midnight mb-3">
             Your title/role * (select all that apply)
           </label>
-          <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-300 rounded-lg p-3">
+          <div className="space-y-0.5 max-h-64 overflow-y-auto border-2 border-dealflow-light-grey/50 rounded-xl p-2 bg-dealflow-cream/50">
             {titleOptions.map(option => {
               const isSelected = (formData.title || []).includes(option);
               return (
                 <label
                   key={option}
-                  className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                  className="flex items-center gap-2 py-0.5 px-2 rounded hover:bg-white cursor-pointer transition-all duration-200"
                 >
                   <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggleTitle(option)}
-                    className="w-4 h-4 text-dealflow-teal border-gray-300 rounded focus:ring-dealflow-teal"
+                    className="w-4 h-4 text-dealflow-sky border-2 border-dealflow-light-grey rounded focus:ring-1 focus:ring-dealflow-sky cursor-pointer"
                   />
-                  <span className="text-sm text-gray-700">{option}</span>
+                  <span className="text-sm font-body text-dealflow-midnight">{option}</span>
                 </label>
               );
             })}
           </div>
           {(formData.title || []).length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="text-xs text-gray-500">Selected:</span>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="text-sm font-body text-dealflow-light-grey">Selected:</span>
               {(formData.title || []).map(title => (
                 <span
                   key={title}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-dealflow-teal/10 text-dealflow-teal rounded text-xs font-medium"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-dealflow-sky/10 to-dealflow-orange/10 text-dealflow-sky rounded-lg text-sm font-body font-semibold border border-dealflow-sky/20"
                 >
                   {title}
                   <button
                     type="button"
                     onClick={() => toggleTitle(title)}
-                    className="hover:text-dealflow-midnight"
+                    className="hover:text-dealflow-orange transition-colors"
                     aria-label={`Remove ${title}`}
                   >
                     ×
@@ -166,7 +166,7 @@ export function AboutYou({ formData, updateFormData, onNext }: Props) {
             </div>
           )}
           {(!formData.title || formData.title.length === 0) && (
-            <p className="text-xs text-red-500 mt-1">Please select at least one title</p>
+            <p className="text-sm font-body text-dealflow-muted-red mt-2">Please select at least one title</p>
           )}
         </div>
 
@@ -174,7 +174,7 @@ export function AboutYou({ formData, updateFormData, onNext }: Props) {
         <div>
           <label 
             htmlFor="expertise-select"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
           >
             Your area of expertise *
           </label>
@@ -184,7 +184,7 @@ export function AboutYou({ formData, updateFormData, onNext }: Props) {
             onChange={(e) => updateFormData('expertise', e.target.value)}
             aria-required="true"
             aria-invalid={!formData.expertise}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all bg-white"
+            className="w-full px-4 py-1 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 bg-white font-body text-sm text-dealflow-midnight"
           >
             <option value="">Select your expertise...</option>
             {expertiseOptions.map(opt => (
@@ -197,7 +197,7 @@ export function AboutYou({ formData, updateFormData, onNext }: Props) {
         <div>
           <label 
             htmlFor="credibility-textarea"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
           >
             Your biggest credibility point *
           </label>
@@ -210,40 +210,52 @@ export function AboutYou({ formData, updateFormData, onNext }: Props) {
               }
             }}
             placeholder="Your biggest achievement, company, or social proof..."
-            rows={3}
+            rows={2}
             maxLength={500}
             aria-required="true"
             aria-invalid={formData.credibility.length < 20}
             aria-describedby="credibility-helper"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
+            className="w-full px-4 py-1.5 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-sm text-dealflow-midnight placeholder:text-dealflow-light-grey resize-none"
           />
-          <p id="credibility-helper" className="text-sm text-gray-500 mt-1">
+          <p id="credibility-helper" className="text-sm font-body text-dealflow-light-grey mt-2">
             {formData.credibility.length}/500 characters (minimum 20)
           </p>
-          <div className="mt-2 space-y-1">
-            <p className="text-xs font-medium text-gray-600">Examples:</p>
-            {credibilityExamples.map((example, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => updateFormData('credibility', example)}
-                className="block w-full text-left text-xs text-gray-600 hover:text-dealflow-teal px-2 py-1 rounded hover:bg-gray-50 transition-colors"
-              >
-                "{example}"
-              </button>
-            ))}
+          <div className="mt-3">
+            <p className="text-sm font-body font-semibold text-dealflow-midnight mb-2">Don't know what to write? Here are some examples. Click on the buttons to get started...</p>
+            <div className="flex flex-wrap gap-2">
+              {credibilityExamples.map((example, idx) => {
+                const isClicked = clickedCredibilityExample === idx || formData.credibility === example;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      updateFormData('credibility', example);
+                      setClickedCredibilityExample(idx);
+                    }}
+                    className={`text-sm font-body px-3 py-2 rounded-lg border transition-all duration-200 ${
+                      isClicked
+                        ? 'text-dealflow-sky bg-dealflow-sky/10 border-dealflow-sky/50 font-semibold'
+                        : 'text-dealflow-light-grey hover:text-dealflow-sky border-dealflow-light-grey/30 hover:bg-dealflow-sky/10 hover:border-dealflow-sky/50'
+                    }`}
+                  >
+                    "{example}"
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <button
           onClick={onNext}
           disabled={!isValid}
-          className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all ${
+          className={`w-full py-4 px-8 rounded-xl font-body font-semibold text-lg text-white transition-all duration-200 shadow-lg ${
             isValid 
-              ? 'bg-dealflow-teal hover:bg-dealflow-midnight' 
-              : 'bg-gray-300 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 hover:from-dealflow-midnight hover:to-dealflow-sky hover:shadow-xl transform hover:-translate-y-0.5' 
+              : 'bg-dealflow-light-grey cursor-not-allowed'
           }`}
         >
           Continue

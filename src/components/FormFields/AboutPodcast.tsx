@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 interface FormData {
   podcastName: string;
   hostName: string;
@@ -30,34 +32,36 @@ const whyPodcastExamples = [
 ];
 
 export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props) {
+  const [clickedTopicExample, setClickedTopicExample] = useState<number | null>(null);
+  const [clickedWhyExample, setClickedWhyExample] = useState<number | null>(null);
   const isValid = formData.podcastName && formData.hostName && formData.guestName && 
                   formData.episodeTopic.length >= 10 && formData.whyPodcast.length >= 50;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-      <div className="flex items-center mb-6">
+    <div className="bg-white rounded-2xl shadow-lg border border-dealflow-light-grey/30 p-10 transition-all duration-300 hover:shadow-xl">
+      <div className="flex items-center mb-8">
         <button
           onClick={onBack}
-          className="text-gray-400 hover:text-gray-600 mr-4"
+          className="text-dealflow-light-grey hover:text-dealflow-sky mr-4 transition-colors duration-200 font-body font-semibold"
         >
           ← Back
         </button>
         <div>
-          <h2 className="text-2xl font-semibold text-dealflow-midnight">
+          <h2 className="text-3xl font-heading font-bold text-dealflow-midnight">
             About the podcast
           </h2>
-          <p className="text-gray-600">
+          <p className="text-lg font-body text-dealflow-light-grey mt-1">
             Tell us which show you want to be on.
           </p>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Podcast Name */}
         <div>
           <label 
             htmlFor="podcast-name-input"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
           >
             Podcast name *
           </label>
@@ -69,7 +73,7 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             placeholder="Flixwatcher Podcast"
             aria-required="true"
             aria-invalid={!formData.podcastName}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
+            className="w-full px-4 py-2 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-dealflow-midnight placeholder:text-dealflow-light-grey"
           />
         </div>
 
@@ -77,7 +81,7 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
         <div>
           <label 
             htmlFor="host-name-input"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
           >
             Host first name *
           </label>
@@ -89,7 +93,7 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             placeholder="Mike"
             aria-required="true"
             aria-invalid={!formData.hostName}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
+            className="w-full px-4 py-2 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-dealflow-midnight placeholder:text-dealflow-light-grey"
           />
         </div>
 
@@ -97,7 +101,7 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
         <div>
           <label 
             htmlFor="guest-name-input"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
           >
             A guest you enjoyed listening to *
           </label>
@@ -110,9 +114,9 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             aria-required="true"
             aria-invalid={!formData.guestName}
             aria-describedby="guest-name-helper"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
+            className="w-full px-4 py-2 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-dealflow-midnight placeholder:text-dealflow-light-grey"
           />
-          <p id="guest-name-helper" className="text-sm text-gray-500 mt-1">
+          <p id="guest-name-helper" className="text-sm font-body text-dealflow-light-grey mt-2">
             Name a guest from a recent episode. This proves you actually listen.
           </p>
         </div>
@@ -121,7 +125,7 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
         <div>
           <label 
             htmlFor="episode-topic-input"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
           >
             What did they discuss? *
           </label>
@@ -133,20 +137,32 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
             placeholder="How to hire your first VP of Sales"
             aria-required="true"
             aria-invalid={formData.episodeTopic.length < 10}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
+            className="w-full px-4 py-2 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-dealflow-midnight placeholder:text-dealflow-light-grey"
           />
-          <div className="mt-2 space-y-1">
-            <p className="text-xs font-medium text-gray-600">Examples:</p>
-            {episodeTopicExamples.map((example, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => updateFormData('episodeTopic', example)}
-                className="block w-full text-left text-xs text-gray-600 hover:text-dealflow-teal px-2 py-1 rounded hover:bg-gray-50 transition-colors"
-              >
-                "{example}"
-              </button>
-            ))}
+          <div className="mt-3">
+            <p className="text-sm font-body font-semibold text-dealflow-midnight mb-2">Don't know what to write? Here are some examples. Click on the buttons to get started...</p>
+            <div className="flex flex-wrap gap-2">
+              {episodeTopicExamples.map((example, idx) => {
+                const isClicked = clickedTopicExample === idx || formData.episodeTopic === example;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      updateFormData('episodeTopic', example);
+                      setClickedTopicExample(idx);
+                    }}
+                    className={`text-sm font-body px-3 py-2 rounded-lg border transition-all duration-200 ${
+                      isClicked
+                        ? 'text-dealflow-sky bg-dealflow-sky/10 border-dealflow-sky/50 font-semibold'
+                        : 'text-dealflow-light-grey hover:text-dealflow-sky border-dealflow-light-grey/30 hover:bg-dealflow-sky/10 hover:border-dealflow-sky/50'
+                    }`}
+                  >
+                    "{example}"
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -154,7 +170,7 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
         <div>
           <label 
             htmlFor="why-podcast-textarea"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-base font-body font-semibold text-dealflow-midnight mb-2"
           >
             Why do you want to be on THIS podcast? *
           </label>
@@ -167,40 +183,52 @@ export function AboutPodcast({ formData, updateFormData, onNext, onBack }: Props
               }
             }}
             placeholder="Love the tactical depth, no fluff. Your episodes on pricing strategies were game-changing for our team."
-            rows={4}
+            rows={3}
             maxLength={280}
             aria-required="true"
             aria-invalid={formData.whyPodcast.length < 50}
             aria-describedby="why-podcast-helper"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent transition-all"
+            className="w-full px-4 py-2 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-dealflow-midnight placeholder:text-dealflow-light-grey resize-none"
           />
-          <p id="why-podcast-helper" className="text-sm text-gray-500 mt-1">
+          <p id="why-podcast-helper" className="text-sm font-body text-dealflow-light-grey mt-2">
             {formData.whyPodcast.length}/280 characters (minimum 50)
           </p>
-          <div className="mt-2 space-y-1">
-            <p className="text-xs font-medium text-gray-600">Examples:</p>
-            {whyPodcastExamples.map((example, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => updateFormData('whyPodcast', example)}
-                className="block w-full text-left text-xs text-gray-600 hover:text-dealflow-teal px-2 py-1 rounded hover:bg-gray-50 transition-colors"
-              >
-                "{example}"
-              </button>
-            ))}
+          <div className="mt-3">
+            <p className="text-sm font-body font-semibold text-dealflow-midnight mb-2">Don't know what to write? Here are some examples. Click on the buttons to get started...</p>
+            <div className="flex flex-wrap gap-2">
+              {whyPodcastExamples.map((example, idx) => {
+                const isClicked = clickedWhyExample === idx || formData.whyPodcast === example;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      updateFormData('whyPodcast', example);
+                      setClickedWhyExample(idx);
+                    }}
+                    className={`text-sm font-body px-3 py-2 rounded-lg border transition-all duration-200 ${
+                      isClicked
+                        ? 'text-dealflow-sky bg-dealflow-sky/10 border-dealflow-sky/50 font-semibold'
+                        : 'text-dealflow-light-grey hover:text-dealflow-sky border-dealflow-light-grey/30 hover:bg-dealflow-sky/10 hover:border-dealflow-sky/50'
+                    }`}
+                  >
+                    "{example}"
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <button
           onClick={onNext}
           disabled={!isValid}
-          className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all ${
+          className={`w-full py-4 px-8 rounded-xl font-body font-semibold text-lg text-white transition-all duration-200 shadow-lg ${
             isValid 
-              ? 'bg-dealflow-teal hover:bg-dealflow-midnight' 
-              : 'bg-gray-300 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 hover:from-dealflow-midnight hover:to-dealflow-sky hover:shadow-xl transform hover:-translate-y-0.5' 
+              : 'bg-dealflow-light-grey cursor-not-allowed'
           }`}
         >
           Continue

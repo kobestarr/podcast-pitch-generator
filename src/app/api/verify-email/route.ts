@@ -44,12 +44,18 @@ export async function POST(request: NextRequest) {
       const code = generateCode();
       const expiresAt = Date.now() + CODE_EXPIRY;
       
-      // Store code (keyed by email)
-      verificationCodes.set(email.toLowerCase(), {
+      // Store code (keyed by normalized email)
+      const emailKey = email.toLowerCase().trim();
+      verificationCodes.set(emailKey, {
         code,
-        email: email.toLowerCase(),
+        email: emailKey,
         expiresAt,
       });
+      
+      // In development, log the code for easy testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[DEV] Verification code for ${emailKey}: ${code}`);
+      }
 
       // Send verification code via Resend
       try {
@@ -130,9 +136,25 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const stored = verificationCodes.get(email.toLowerCase());
+      // Normalize the code: trim whitespace and ensure it's exactly 6 digits
+      const normalizedCode = code.trim().replace(/\D/g, '');
+      
+      if (normalizedCode.length !== 6) {
+        return NextResponse.json(
+          { error: 'Verification code must be 6 digits' },
+          { status: 400 }
+        );
+      }
+
+      const emailKey = email.toLowerCase().trim();
+      const stored = verificationCodes.get(emailKey);
 
       if (!stored) {
+        // In development, log available codes for debugging
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Available codes:', Array.from(verificationCodes.keys()));
+          console.log('Looking for:', emailKey);
+        }
         return NextResponse.json(
           { error: 'No verification code found. Please request a new one.' },
           { status: 404 }
@@ -140,14 +162,26 @@ export async function POST(request: NextRequest) {
       }
 
       if (Date.now() > stored.expiresAt) {
-        verificationCodes.delete(email.toLowerCase());
+        verificationCodes.delete(emailKey);
         return NextResponse.json(
           { error: 'Verification code has expired. Please request a new one.' },
           { status: 410 }
         );
       }
 
-      if (stored.code !== code) {
+      // Compare normalized codes
+      if (stored.code !== normalizedCode) {
+        // In development, log the mismatch for debugging
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Code mismatch:', {
+            stored: stored.code,
+            received: code,
+            normalized: normalizedCode,
+            storedLength: stored.code.length,
+            receivedLength: code.length,
+            normalizedLength: normalizedCode.length
+          });
+        }
         return NextResponse.json(
           { error: 'Invalid verification code. Please try again.' },
           { status: 400 }
@@ -155,7 +189,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Code is valid - remove it
-      verificationCodes.delete(email.toLowerCase());
+      verificationCodes.delete(emailKey);
 
       // Sync contact to GHL (don't block verification if this fails)
       if (formData) {

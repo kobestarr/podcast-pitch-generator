@@ -324,12 +324,12 @@ export function getAllFieldStatuses(formData: FormData) {
  */
 export function getScoreColor(score: number): string {
   if (score <= SCORE_THRESHOLDS.WEAK) {
-    return 'text-red-500 bg-red-100';
+    return 'text-dealflow-muted-red bg-dealflow-muted-red/10';
   }
   if (score <= SCORE_THRESHOLDS.GETTING_THERE) {
-    return 'text-yellow-600 bg-yellow-100';
+    return 'text-dealflow-golden-yellow bg-dealflow-golden-yellow/10';
   }
-  return 'text-green-600 bg-green-100';
+  return 'text-dealflow-warm-green bg-dealflow-warm-green/10';
 }
 
 /**
@@ -350,9 +350,9 @@ export function getScoreLabel(score: number): string {
  * @returns Tailwind CSS class for progress bar
  */
 export function getScoreBarColor(score: number): string {
-  if (score <= SCORE_THRESHOLDS.WEAK) return 'bg-red-500';
-  if (score <= SCORE_THRESHOLDS.GETTING_THERE) return 'bg-yellow-500';
-  return 'bg-green-500';
+  if (score <= SCORE_THRESHOLDS.WEAK) return 'from-dealflow-muted-red to-dealflow-muted-red/80';
+  if (score <= SCORE_THRESHOLDS.GETTING_THERE) return 'from-dealflow-golden-yellow to-dealflow-orange';
+  return 'from-dealflow-warm-green to-dealflow-sky';
 }
 
 /**

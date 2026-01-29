@@ -168,7 +168,7 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
       const response = await fetch('/api/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, action: 'request' }),
+        body: JSON.stringify({ email: email.trim(), action: 'request' }),
       });
 
       const data = await response.json();
@@ -196,12 +196,21 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
     setCodeError(null);
 
     try {
+      // Normalize the code: trim and ensure it's exactly 6 digits
+      const normalizedCode = verificationCode.trim().replace(/\D/g, '');
+      
+      if (normalizedCode.length !== 6) {
+        setCodeError('Please enter a 6-digit verification code');
+        setCodeLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          email, 
-          code: verificationCode, 
+          email: email.trim(), 
+          code: normalizedCode, 
           action: 'verify',
           formData: formData // Send all form data for GHL sync
         }),
@@ -261,12 +270,12 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
       )}
       {/* Email Gate Modal */}
       {showEmailModal && !emailVerified && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 transition-opacity duration-200">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto transition-transform duration-200 transform scale-100">
-            <div className="p-6">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 transition-opacity duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto transition-transform duration-200 transform scale-100">
+            <div className="p-8">
               {/* Close Button */}
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-semibold text-dealflow-midnight">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-heading font-bold text-dealflow-midnight">
                   Unlock All Pitch Versions
                 </h3>
                 <button
@@ -279,7 +288,7 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                       setActivePitch(1);
                     }
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-dealflow-light-grey hover:text-dealflow-midnight transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -288,28 +297,42 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
               </div>
 
               {/* Bonuses List */}
-              <div className="mb-6">
-                <p className="text-gray-600 mb-4">Verify your email to unlock:</p>
-                <ul className="space-y-3">
+              <div className="mb-8">
+                <p className="text-lg font-body text-dealflow-light-grey mb-5">Verify your email to unlock:</p>
+                <ul className="space-y-4">
                   <li className="flex items-start gap-3">
-                    <span className="text-green-600 mt-0.5">✅</span>
-                    <span className="text-gray-700">Access to <strong>Social Proof</strong> pitch version</span>
+                    <span className="text-dealflow-sky mt-0.5 text-xl">✅</span>
+                    <span className="text-dealflow-midnight font-body">Access to <strong className="font-semibold">Social Proof</strong> pitch version</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-green-600 mt-0.5">✅</span>
-                    <span className="text-gray-700">Access to <strong>Casual & Mobile</strong> pitch version</span>
+                    <span className="text-dealflow-sky mt-0.5 text-xl">✅</span>
+                    <span className="text-dealflow-midnight font-body">Access to <strong className="font-semibold">Casual & Mobile</strong> pitch version</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-green-600 mt-0.5">✅</span>
-                    <span className="text-gray-700"><strong>3 follow-up email templates</strong> (5-7 days, 10-14 days, 21 days)</span>
+                    <span className="text-dealflow-sky mt-0.5 text-xl">✅</span>
+                    <span className="text-dealflow-midnight font-body"><strong className="font-semibold">3 follow-up email templates</strong> (5-7 days, 10-14 days, 21 days)</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-green-600 mt-0.5">✅</span>
-                    <span className="text-gray-700"><strong>Bonus PDF cheat sheet</strong> - Podcast Research Guide</span>
+                    <span className="text-dealflow-sky mt-0.5 text-xl">✅</span>
+                    <span className="text-dealflow-midnight font-body">
+                      <strong className="font-semibold">FREE 7 day podcast guesting email course</strong>
+                      {emailVerified && (
+                        <span className="ml-2">
+                          <a 
+                            href="https://v.stripped.media/7-day-podcast-guesting-course-lp?utm_source=podcast-pitch-generator&utm_medium=email-verification&utm_campaign=7-day-course-signup&utm_content=modal-bonus"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-dealflow-sky hover:text-dealflow-midnight underline text-sm"
+                          >
+                            (Access course)
+                          </a>
+                        </span>
+                      )}
+                    </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-green-600 mt-0.5">✅</span>
-                    <span className="text-gray-700">Content Catalyst newsletter subscription (unsubscribe anytime)</span>
+                    <span className="text-dealflow-sky mt-0.5 text-xl">✅</span>
+                    <span className="text-dealflow-midnight font-body">Content Catalyst newsletter subscription (unsubscribe anytime)</span>
                   </li>
                 </ul>
               </div>
@@ -342,11 +365,11 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
 
               {verificationStep === 'code' && (
                 <form onSubmit={verifyCode}>
-                  <div className="mb-4">
-                    <p className="text-sm text-gray-600 mb-3">
-                      We sent a 6-digit code to <strong>{email}</strong>. Enter it below:
+                  <div className="mb-5">
+                    <p className="text-base font-body text-dealflow-light-grey mb-4">
+                      We sent a 6-digit code to <strong className="font-semibold text-dealflow-midnight">{email}</strong>. Enter it below:
                     </p>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="text"
                         value={verificationCode}
@@ -357,47 +380,119 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                         placeholder="000000"
                         required
                         maxLength={6}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent text-center text-2xl font-mono tracking-widest"
+                        className="flex-1 px-5 py-4 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky text-center text-2xl font-mono tracking-widest transition-all duration-200"
                       />
                       <button
                         type="submit"
                         disabled={codeLoading || verificationCode.length !== 6}
-                        className="px-6 py-3 bg-dealflow-teal text-white font-semibold rounded-lg hover:bg-dealflow-midnight transition-all disabled:opacity-50"
+                        className="px-6 py-4 bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 text-white font-body font-semibold rounded-xl hover:from-dealflow-midnight hover:to-dealflow-sky transition-all duration-200 disabled:opacity-50 whitespace-nowrap shadow-lg hover:shadow-xl"
                       >
                         {codeLoading ? 'Verifying...' : 'Verify'}
                       </button>
                     </div>
                     {codeError && (
-                      <p className="text-red-500 text-sm mt-2">{codeError}</p>
+                      <div className="mt-3">
+                        <p className="text-dealflow-muted-red text-sm font-body mb-2">{codeError}</p>
+                        {(codeError.includes('No verification code found') || codeError.includes('expired')) && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              setCodeError(null);
+                              setVerificationCode('');
+                              setEmailLoading(true);
+                              try {
+                                const response = await fetch('/api/verify-email', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ email, action: 'request' }),
+                                });
+                                const data = await response.json();
+                                if (!response.ok) {
+                                  setEmailError(data.error || 'Failed to send verification code');
+                                } else {
+                                  // Code sent successfully, stay on code step
+                                }
+                              } catch (err) {
+                                setEmailError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+                              } finally {
+                                setEmailLoading(false);
+                              }
+                            }}
+                            className="text-sm font-body text-dealflow-sky hover:text-dealflow-midnight font-semibold transition-colors underline"
+                          >
+                            Request a new code →
+                          </button>
+                        )}
+                      </div>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setVerificationStep('email');
-                        setCodeError(null);
-                        setVerificationCode('');
-                      }}
-                      className="text-sm text-gray-500 hover:text-gray-700 mt-2"
-                    >
-                      ← Use a different email
-                    </button>
+                    <div className="flex items-center justify-between mt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVerificationStep('email');
+                          setCodeError(null);
+                          setVerificationCode('');
+                        }}
+                        className="text-sm font-body text-dealflow-light-grey hover:text-dealflow-sky transition-colors"
+                      >
+                        ← Use a different email
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setCodeError(null);
+                          setVerificationCode('');
+                          setEmailLoading(true);
+                          try {
+                            const response = await fetch('/api/verify-email', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ email, action: 'request' }),
+                            });
+                            const data = await response.json();
+                            if (!response.ok) {
+                              setCodeError(data.error || 'Failed to send verification code');
+                            } else {
+                              // Code sent successfully, stay on code step
+                            }
+                          } catch (err) {
+                            setCodeError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+                          } finally {
+                            setEmailLoading(false);
+                          }
+                        }}
+                        className="text-sm font-body text-dealflow-light-grey hover:text-dealflow-sky transition-colors"
+                      >
+                        Resend code
+                      </button>
+                    </div>
                   </div>
                 </form>
               )}
 
               {verificationStep === 'verified' && (
-                <div className="text-center py-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="text-center py-6">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-dealflow-warm-green/20 to-dealflow-sky/20 rounded-full mb-6 shadow-lg">
+                    <svg className="w-10 h-10 text-dealflow-warm-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h4 className="text-xl font-semibold text-dealflow-midnight mb-2">
+                  <h4 className="text-2xl font-heading font-bold text-dealflow-midnight mb-3">
                     Email Verified! ✅
                   </h4>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-lg font-body text-dealflow-light-grey mb-6">
                     You now have access to all pitches and follow-up templates.
                   </p>
+                  <div className="mb-6">
+                    <a 
+                      href="https://v.stripped.media/7-day-podcast-guesting-course-lp?utm_source=podcast-pitch-generator&utm_medium=email-verification&utm_campaign=7-day-course-signup&utm_content=verified-success"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-dealflow-sky hover:text-dealflow-midnight underline font-body font-semibold"
+                    >
+                      Access your FREE 7 day podcast guesting email course →
+                    </a>
+                  </div>
                   <button
                     onClick={() => {
                       setShowEmailModal(false);
@@ -409,14 +504,14 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                         setActivePitch(2); // Default to Social Proof after verification
                       }
                     }}
-                    className="px-6 py-3 bg-dealflow-teal text-white font-semibold rounded-lg hover:bg-dealflow-midnight transition-all"
+                    className="px-8 py-4 bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 text-white font-body font-bold rounded-xl hover:from-dealflow-midnight hover:to-dealflow-sky transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
                     View All Pitches →
                   </button>
                 </div>
               )}
 
-              <p className="text-xs text-gray-500 mt-4 text-center">
+                  <p className="text-sm font-body text-dealflow-light-grey mt-6 text-center">
                 We'll add you to our Content Catalyst newsletter. Unsubscribe anytime.
               </p>
             </div>
@@ -424,38 +519,40 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
         </div>
       )}
       {/* Success Header */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+      <div className="mb-6">
+        <div className="flex items-center gap-4 mb-2">
+          <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-dealflow-sky/20 to-dealflow-orange/20 rounded-full shadow-lg">
+            <svg className="w-6 h-6 text-dealflow-sky" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-heading font-bold text-dealflow-midnight">
+            Your Pitches Are Ready! 🎉
+          </h2>
         </div>
-        <h2 className="text-3xl font-bold text-dealflow-midnight mb-2">
-          Your Pitches Are Ready! 🎉
-        </h2>
-        <p className="text-gray-600">
+        <p className="text-base sm:text-lg font-body text-dealflow-light-grey ml-16">
           3 personalized variations, ready to copy and send to {formData.hostName}.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-3 mb-8">
         <button
           onClick={() => setActiveTab('pitches')}
-          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+          className={`px-6 py-3 rounded-xl font-body font-semibold text-base transition-all duration-200 ${
             activeTab === 'pitches' 
-              ? 'bg-dealflow-teal text-white shadow-md' 
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 text-white shadow-lg' 
+              : 'bg-white text-dealflow-light-grey hover:text-dealflow-sky border-2 border-dealflow-light-grey/30 hover:border-dealflow-sky/50'
           }`}
         >
           3 Pitches
         </button>
         <button
           onClick={() => setActiveTab('followups')}
-          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+          className={`px-6 py-3 rounded-xl font-body font-semibold text-base transition-all duration-200 ${
             activeTab === 'followups' 
-              ? 'bg-dealflow-teal text-white shadow-md' 
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 text-white shadow-lg' 
+              : 'bg-white text-dealflow-light-grey hover:text-dealflow-sky border-2 border-dealflow-light-grey/30 hover:border-dealflow-sky/50'
           }`}
         >
           Follow-ups
@@ -465,14 +562,14 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
       {activeTab === 'pitches' ? (
         <div className="transition-opacity duration-300">
           {/* Pitch Selector - Only show pitch_1 initially, unlock others after verification */}
-          <div className="flex flex-col sm:flex-row gap-2 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             {/* Pitch 1 - Always available */}
             <button
               onClick={() => setActivePitch(1)}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
+              className={`flex-[0.75] py-2 px-3 rounded-lg font-body font-semibold text-sm transition-all duration-200 ${
                 activePitch === 1
-                  ? 'bg-dealflow-midnight text-white shadow-md'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-dealflow-midnight to-dealflow-sky text-white shadow-lg transform scale-105'
+                  : 'bg-white text-dealflow-light-grey hover:text-dealflow-sky border-2 border-dealflow-light-grey/30 hover:border-dealflow-sky/50'
               }`}
             >
               Direct & Professional
@@ -483,20 +580,20 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
               <>
                 <button
                   onClick={() => setActivePitch(2)}
-                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
+                  className={`flex-[0.75] py-2 px-3 rounded-lg font-body font-semibold text-sm transition-all duration-200 ${
                     activePitch === 2
-                      ? 'bg-dealflow-midnight text-white shadow-md'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-dealflow-midnight to-dealflow-sky text-white shadow-lg transform scale-105'
+                      : 'bg-white text-dealflow-light-grey hover:text-dealflow-sky border-2 border-dealflow-light-grey/30 hover:border-dealflow-sky/50'
                   }`}
                 >
                   See Social Proof version
                 </button>
                 <button
                   onClick={() => setActivePitch(3)}
-                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
+                  className={`flex-[0.75] py-2 px-3 rounded-lg font-body font-semibold text-sm transition-all duration-200 ${
                     activePitch === 3
-                      ? 'bg-dealflow-midnight text-white shadow-md'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-dealflow-midnight to-dealflow-sky text-white shadow-lg transform scale-105'
+                      : 'bg-white text-dealflow-light-grey hover:text-dealflow-sky border-2 border-dealflow-light-grey/30 hover:border-dealflow-sky/50'
                   }`}
                 >
                   See Casual and Mobile Version
@@ -509,22 +606,22 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                     setShowEmailModal(true);
                     setActivePitch(2); // Set desired pitch for after verification
                   }}
-                  className="flex-1 py-3 px-4 rounded-lg font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all relative"
+                  className="flex-[0.75] py-2 px-3 rounded-lg font-body font-semibold text-sm bg-white text-dealflow-light-grey hover:text-dealflow-sky border-2 border-dealflow-light-grey/30 hover:border-dealflow-sky/50 transition-all relative animate-pulse-locked"
                   title="Verify your email to unlock"
                 >
                   See Social Proof version
-                  <span className="absolute top-1 right-1 text-xs">🔒</span>
+                  <span className="absolute top-1 right-1 text-xs animate-pulse">🔒</span>
                 </button>
                 <button
                   onClick={() => {
                     setShowEmailModal(true);
                     setActivePitch(3); // Set desired pitch for after verification
                   }}
-                  className="flex-1 py-3 px-4 rounded-lg font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all relative"
+                  className="flex-[0.75] py-2 px-3 rounded-lg font-body font-semibold text-sm bg-white text-dealflow-light-grey hover:text-dealflow-sky border-2 border-dealflow-light-grey/30 hover:border-dealflow-sky/50 transition-all relative animate-pulse-locked"
                   title="Verify your email to unlock"
                 >
                   See Casual and Mobile Version
-                  <span className="absolute top-1 right-1 text-xs">🔒</span>
+                  <span className="absolute top-1 right-1 text-xs animate-pulse">🔒</span>
                 </button>
               </>
             )}
@@ -533,15 +630,15 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
 
           {/* Pitch Display - Only show pitch 1 initially, others require verification */}
           {activePitch === 1 || emailVerified ? (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300">
+            <div className="bg-white rounded-2xl shadow-xl border border-dealflow-light-grey/30 overflow-hidden transition-all duration-300">
               {/* Pitch Header */}
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 py-4 border-b border-gray-200">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="bg-gradient-to-r from-dealflow-sky/10 to-dealflow-orange/10 px-6 sm:px-8 py-6 border-b border-dealflow-light-grey/30">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
-                    <span className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Subject</span>
-                    <p className="font-semibold text-dealflow-midnight text-lg sm:text-xl mt-1">{currentPitch.subject}</p>
+                    <span className="text-xs sm:text-sm font-body text-dealflow-light-grey uppercase tracking-wide">Subject</span>
+                    <p className="font-heading font-bold text-dealflow-midnight text-xl sm:text-2xl mt-2">{currentPitch.subject}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <button
                       onClick={() => {
                         const timestamp = new Date().toISOString().split('T')[0];
@@ -549,25 +646,25 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                         const style = currentPitch.style || `pitch-${pitchNum}`;
                         downloadPitch(currentPitch, `podcast-pitch-${style.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.txt`);
                       }}
-                      className="px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-white text-dealflow-midnight border border-gray-300 hover:bg-gray-50 hover:border-dealflow-teal flex items-center gap-2"
+                      className="px-4 sm:px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-200 bg-white text-dealflow-midnight border-2 border-dealflow-light-grey/30 hover:bg-dealflow-sky/10 hover:border-dealflow-sky flex items-center gap-2 shadow-sm hover:shadow-md"
                       title="Download pitch"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                       </svg>
                       <span className="hidden sm:inline">Download</span>
                     </button>
                     <button
                       onClick={() => copyToClipboard(`${currentPitch.subject}\n\n${currentPitch.body}`, `pitch-${activePitch}`)}
-                      className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+                      className={`px-4 sm:px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md ${
                         copied === `pitch-${activePitch}`
-                          ? 'bg-green-500 text-white shadow-md'
-                          : 'bg-dealflow-teal text-white hover:bg-dealflow-midnight'
+                          ? 'bg-gradient-to-r from-dealflow-warm-green to-dealflow-warm-green/90 text-white'
+                          : 'bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 text-white hover:from-dealflow-midnight hover:to-dealflow-sky'
                       }`}
                     >
                       {copied === `pitch-${activePitch}` ? (
                         <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                           <span className="hidden sm:inline">Copied!</span>
@@ -575,7 +672,7 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                         </>
                       ) : (
                         <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                           </svg>
                           <span className="hidden sm:inline">Copy Pitch</span>
@@ -588,79 +685,93 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
               </div>
 
               {/* Pitch Body */}
-              <div className="p-4 sm:p-6 lg:p-8">
+              <div className="p-6 sm:p-8 lg:p-10">
                 <div className="prose prose-sm sm:prose-base max-w-none">
-                  <div className="text-gray-700 leading-relaxed">
+                  <div className="text-dealflow-midnight leading-relaxed font-body text-base sm:text-lg">
                     {formatPitchBody(currentPitch.body)}
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 sm:p-8 lg:p-12">
-              <div className="text-center mb-6">
-                <div className="text-4xl mb-4">🔒</div>
-                <h3 className="text-xl font-semibold text-dealflow-midnight mb-3">
+            <div className="bg-white rounded-2xl shadow-xl border border-dealflow-light-grey/30 p-8 sm:p-10 lg:p-12">
+              <div className="text-center mb-8">
+                <div className="text-5xl mb-6">🔒</div>
+                <h3 className="text-2xl sm:text-3xl font-heading font-bold text-dealflow-midnight mb-4">
                   Send us your email to unlock the other two pitches
                 </h3>
-                <p className="text-gray-600 mb-4 leading-relaxed">
+                <p className="text-lg font-body text-dealflow-light-grey mb-6 leading-relaxed">
                   Enter your email below to see the Social Proof and Casual & Mobile pitch variations. In doing so, you will also receive:
                 </p>
-                <ul className="text-left max-w-md mx-auto mb-6 space-y-2 text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <span className="text-dealflow-teal mt-1">✓</span>
-                    <span>Access to <strong>Social Proof</strong> pitch version</span>
+                <ul className="text-left max-w-md mx-auto mb-8 space-y-3 text-dealflow-midnight font-body">
+                  <li className="flex items-start gap-3">
+                    <span className="text-dealflow-sky mt-1 text-xl">✓</span>
+                    <span>Access to <strong className="font-semibold">Social Proof</strong> pitch version</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-dealflow-teal mt-1">✓</span>
-                    <span>Access to <strong>Casual & Mobile</strong> pitch version</span>
+                  <li className="flex items-start gap-3">
+                    <span className="text-dealflow-sky mt-1 text-xl">✓</span>
+                    <span>Access to <strong className="font-semibold">Casual & Mobile</strong> pitch version</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-dealflow-teal mt-1">✓</span>
-                    <span><strong>3 follow-up email templates</strong> (5-7 days, 10-14 days, 21 days)</span>
+                  <li className="flex items-start gap-3">
+                    <span className="text-dealflow-sky mt-1 text-xl">✓</span>
+                    <span><strong className="font-semibold">3 follow-up email templates</strong> (5-7 days, 10-14 days, 21 days)</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-dealflow-teal mt-1">✓</span>
-                    <span><strong>Bonus PDF cheat sheet</strong> - Podcast Research Guide</span>
+                  <li className="flex items-start gap-3">
+                    <span className="text-dealflow-sky mt-1 text-xl">✓</span>
+                    <span>
+                      <strong className="font-semibold">FREE 7 day podcast guesting email course</strong>
+                      {emailVerified && (
+                        <span className="ml-2">
+                          <a 
+                            href="https://v.stripped.media/7-day-podcast-guesting-course-lp?utm_source=podcast-pitch-generator&utm_medium=email-verification&utm_campaign=7-day-course-signup&utm_content=locked-section-bonus"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-dealflow-sky hover:text-dealflow-midnight underline text-sm"
+                          >
+                            (Access course)
+                          </a>
+                        </span>
+                      )}
+                    </span>
                   </li>
                 </ul>
-                <p className="text-sm text-gray-500 mb-6">
-                  You will also join our email newsletter, <strong>Content Catalyst</strong>. You can unsubscribe at any time.
+                <p className="text-sm font-body text-dealflow-light-grey mb-8">
+                  You will also join our email newsletter, <strong className="font-semibold text-dealflow-midnight">Content Catalyst</strong>. You can unsubscribe at any time.
                 </p>
               </div>
               
               {/* Email Input Form */}
               {verificationStep === 'email' && (
                 <form onSubmit={requestVerificationCode} className="max-w-md mx-auto">
-                  <div className="flex flex-col sm:flex-row gap-3 mb-3">
+                  <div className="flex flex-col sm:flex-row gap-3 mb-4">
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="your@email.com"
                       required
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent"
+                      className="flex-1 px-5 py-4 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky transition-all duration-200 font-body text-dealflow-midnight placeholder:text-dealflow-light-grey"
                     />
                     <button
                       type="submit"
                       disabled={emailLoading}
-                      className="px-6 py-3 bg-dealflow-teal text-white font-semibold rounded-lg hover:bg-dealflow-midnight transition-all duration-200 disabled:opacity-50 whitespace-nowrap"
+                      className="px-6 py-4 bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 text-white font-body font-semibold rounded-xl hover:from-dealflow-midnight hover:to-dealflow-sky transition-all duration-200 disabled:opacity-50 whitespace-nowrap shadow-lg hover:shadow-xl"
                     >
                       {emailLoading ? 'Sending...' : 'Send Code'}
                     </button>
                   </div>
                   {emailError && (
-                    <p className="text-red-500 text-sm text-center mb-3">{emailError}</p>
+                    <p className="text-dealflow-muted-red text-sm text-center mb-3 font-body">{emailError}</p>
                   )}
                 </form>
               )}
 
               {verificationStep === 'code' && (
                 <form onSubmit={verifyCode} className="max-w-md mx-auto">
-                  <p className="text-sm text-gray-600 mb-4 text-center">
-                    We sent a 6-digit code to <strong>{email}</strong>. Enter it below:
+                  <p className="text-base font-body text-dealflow-light-grey mb-5 text-center">
+                    We sent a 6-digit code to <strong className="font-semibold text-dealflow-midnight">{email}</strong>. Enter it below:
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-3 mb-3">
+                  <div className="flex flex-col sm:flex-row gap-3 mb-4">
                     <input
                       type="text"
                       value={verificationCode}
@@ -671,18 +782,18 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                       placeholder="000000"
                       required
                       maxLength={6}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealflow-teal focus:border-transparent text-center text-2xl font-mono tracking-widest"
+                      className="flex-1 px-5 py-4 border-2 border-dealflow-light-grey/50 rounded-xl focus:ring-2 focus:ring-dealflow-sky focus:border-dealflow-sky text-center text-2xl font-mono tracking-widest transition-all duration-200"
                     />
                     <button
                       type="submit"
                       disabled={codeLoading || verificationCode.length !== 6}
-                      className="px-6 py-3 bg-dealflow-teal text-white font-semibold rounded-lg hover:bg-dealflow-midnight transition-all duration-200 disabled:opacity-50 whitespace-nowrap"
+                      className="px-6 py-4 bg-gradient-to-r from-dealflow-sky to-dealflow-sky/90 text-white font-body font-semibold rounded-xl hover:from-dealflow-midnight hover:to-dealflow-sky transition-all duration-200 disabled:opacity-50 whitespace-nowrap shadow-lg hover:shadow-xl"
                     >
                       {codeLoading ? 'Verifying...' : 'Verify'}
                     </button>
                   </div>
                   {codeError && (
-                    <p className="text-red-500 text-sm text-center mb-3">{codeError}</p>
+                    <p className="text-dealflow-muted-red text-sm text-center mb-3 font-body">{codeError}</p>
                   )}
                   <button
                     type="button"
@@ -691,7 +802,7 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                       setCodeError(null);
                       setVerificationCode('');
                     }}
-                    className="text-sm text-gray-500 hover:text-gray-700 text-center w-full mt-2"
+                    className="text-sm font-body text-dealflow-light-grey hover:text-dealflow-sky text-center w-full mt-3 transition-colors"
                   >
                     ← Use a different email
                   </button>
@@ -700,15 +811,15 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
 
               {verificationStep === 'verified' && (
                 <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-dealflow-warm-green/20 to-dealflow-sky/20 rounded-full mb-6 shadow-lg">
+                    <svg className="w-10 h-10 text-dealflow-warm-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h4 className="text-xl font-semibold text-dealflow-midnight mb-2">
+                  <h4 className="text-2xl font-heading font-bold text-dealflow-midnight mb-3">
                     Email Verified! ✅
                   </h4>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-lg font-body text-dealflow-light-grey mb-4">
                     You now have access to all pitches and follow-up templates.
                   </p>
                 </div>
@@ -721,11 +832,11 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
             {emailVerified && (
               <>
                 {/* Course Signup CTA - Primary */}
-                <div className="bg-gradient-to-r from-dealflow-teal to-dealflow-midnight rounded-xl p-6 sm:p-8 text-white shadow-lg">
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-2">
+                <div className="bg-gradient-to-r from-dealflow-midnight via-dealflow-sky to-dealflow-sky rounded-2xl p-8 sm:p-10 text-white shadow-xl">
+                  <h3 className="text-2xl sm:text-3xl font-heading font-bold mb-3">
                     Want to Land More Podcast Appearances?
                   </h3>
-                  <p className="mb-4 opacity-90 leading-relaxed">
+                  <p className="mb-6 text-lg font-body opacity-95 leading-relaxed">
                     Get our free 7-day podcast guesting course. Learn how to pitch, get booked, and turn appearances into clients.
                   </p>
                   <a
@@ -733,19 +844,19 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={trackCourseSignupClick}
-                    className="inline-block px-6 py-3 bg-white text-dealflow-midnight font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="inline-block px-8 py-4 bg-white text-dealflow-midnight font-body font-bold rounded-xl hover:bg-dealflow-cream transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
                     Start Free Course →
                   </a>
                 </div>
 
                 {/* Download All Pitches */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                <div className="bg-white rounded-2xl shadow-lg border border-dealflow-light-grey/30 p-6 sm:p-8">
                   <button
                     onClick={downloadAllPitches}
-                    className="w-full px-6 py-3 bg-gray-100 text-dealflow-midnight font-semibold rounded-lg hover:bg-gray-200 transition-all duration-200 flex items-center justify-center gap-2"
+                    className="w-full px-6 py-4 bg-gradient-to-r from-dealflow-light-grey/20 to-dealflow-light-grey/10 text-dealflow-midnight font-body font-semibold rounded-xl hover:from-dealflow-sky/10 hover:to-dealflow-orange/10 border-2 border-dealflow-light-grey/30 hover:border-dealflow-sky/50 transition-all duration-200 flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Download All Pitches
@@ -755,21 +866,21 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
             )}
             
             {/* Secondary CTA - Get Help */}
-            <div className="p-4 sm:p-6 bg-dealflow-cream rounded-xl border border-dealflow-teal/20 shadow-sm">
-              <h3 className="font-semibold text-dealflow-midnight mb-2 text-lg">
+            <div className="p-6 sm:p-8 bg-gradient-to-br from-dealflow-cream to-white rounded-2xl border-2 border-dealflow-sky/20 shadow-lg animate-bounce-subtle">
+              <h3 className="font-heading font-bold text-dealflow-midnight mb-3 text-xl sm:text-2xl">
                 Writing pitches is the easy part.
               </h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <p className="text-dealflow-midnight/80 mb-4 leading-relaxed font-body text-base sm:text-lg font-medium">
                 Most founders send 10 pitches and give up. We send 50+ for you, handle responses, prep you, and get you booked.
               </p>
-              <p className="text-gray-700 mb-4 font-medium">
+              <p className="text-dealflow-midnight mb-5 font-body font-semibold text-lg">
                 Want us to do it for you? Book a free 15-minute no-obligation consult.
               </p>
               <a
                 href="https://app.usemotion.com/meet/kobi-omenaka/Podcast-guest-outreach-generator"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-6 py-3 bg-dealflow-orange text-white font-semibold rounded-lg hover:bg-orange-600 transition-all duration-200 shadow-md hover:shadow-lg"
+                className="inline-block px-8 py-4 bg-gradient-to-r from-dealflow-orange to-dealflow-orange/90 text-white font-body font-bold rounded-xl hover:from-dealflow-orange/90 hover:to-dealflow-orange transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 animate-pulsate"
               >
                 Book Free Consult →
               </a>
@@ -779,7 +890,7 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
           {/* Generate Another */}
           <button
             onClick={onGenerateAnother}
-            className="w-full mt-4 py-3 px-4 text-gray-600 hover:text-gray-800 transition-all duration-200 rounded-lg hover:bg-gray-50"
+            className="w-full mt-6 py-4 px-6 text-dealflow-light-grey hover:text-dealflow-sky transition-all duration-200 rounded-xl hover:bg-dealflow-sky/5 font-body font-semibold border-2 border-transparent hover:border-dealflow-sky/30"
           >
             Generate another pitch for a different podcast →
           </button>

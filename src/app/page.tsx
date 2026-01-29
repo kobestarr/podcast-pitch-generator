@@ -111,14 +111,19 @@ export default function Home() {
 
     return (
       <div className="text-center py-20">
-        <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-dealflow-teal border-t-transparent"></div>
-        <h2 className="mt-6 text-2xl font-semibold text-dealflow-midnight">
+        <div className="relative inline-block">
+          <div className="animate-spin rounded-full h-20 w-20 border-4 border-dealflow-sky/20 border-t-dealflow-sky border-r-dealflow-orange"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-12 w-12 bg-gradient-to-br from-dealflow-sky to-dealflow-orange rounded-full animate-pulse"></div>
+          </div>
+        </div>
+        <h2 className="mt-8 text-3xl font-heading font-bold text-dealflow-midnight">
           Generating your pitches...
         </h2>
-        <p className="mt-4 text-gray-600 font-medium">
+        <p className="mt-4 text-lg font-body font-semibold text-dealflow-sky">
           {loadingMessages[currentMessageIndex]}
         </p>
-        <p className="mt-2 text-sm text-gray-500">This should take less than a minute</p>
+        <p className="mt-2 text-sm font-body text-dealflow-light-grey">This should take less than a minute</p>
       </div>
     );
   }
@@ -198,6 +203,8 @@ export default function Home() {
         setPitches(data.pitches);
         setGenerationTime(data.generationTimeMs ?? 0);
         setStep('results');
+        // Scroll to top when results are shown
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         throw new Error('Unexpected response format');
       }
@@ -294,64 +301,53 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-dealflow-cream">
       {/* Header */}
-      <header className="bg-dealflow-midnight text-white py-6">
-        <div className="max-w-3xl mx-auto px-6">
-          <h1 className="text-xl font-semibold">
+      <header className="bg-gradient-to-r from-dealflow-midnight to-dealflow-sky text-white py-8 shadow-lg">
+        <div className="max-w-4xl mx-auto px-6">
+          <h1 className="text-3xl sm:text-4xl font-heading font-bold">
             Podcast Guest Pitch Generator
           </h1>
+          <p className="mt-2 text-white/90 text-lg font-body">
+            Write pitches that actually get replies
+          </p>
         </div>
       </header>
 
-      {/* Progress Bar */}
+      {/* Progress Bar and Pitch Score - Combined Sticky Container */}
       {step !== 'generating' && step !== 'results' && (
-        <div className="bg-white border-b border-gray-200 py-4">
-          <div className="max-w-3xl mx-auto px-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-600">
-                {step === 'about-you' && 'Step 1 of 4: About You'}
-                {step === 'about-podcast' && 'Step 2 of 4: About the Podcast'}
-                {step === 'audience' && 'Step 3 of 4: Your Audience'}
-                {step === 'your-value' && 'Step 4 of 4: Your Value'}
-              </span>
-              <span className="text-sm text-gray-500">
-                {step === 'about-you' && '1/4'}
-                {step === 'about-podcast' && '2/4'}
-                {step === 'audience' && '3/4'}
-                {step === 'your-value' && '4/4'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-xs mb-2">
-              <span className={step === 'about-you' ? 'text-dealflow-teal font-medium' : step === 'about-podcast' || step === 'audience' || step === 'your-value' ? 'text-gray-400' : 'text-gray-400'}>
-                1. About You
-              </span>
-              <span className={step === 'about-podcast' ? 'text-dealflow-teal font-medium' : step === 'audience' || step === 'your-value' ? 'text-gray-400' : 'text-gray-400'}>
-                2. Podcast
-              </span>
-              <span className={step === 'audience' ? 'text-dealflow-teal font-medium' : step === 'your-value' ? 'text-gray-400' : 'text-gray-400'}>
-                3. Audience
-              </span>
-              <span className={step === 'your-value' ? 'text-dealflow-teal font-medium' : 'text-gray-400'}>
-                4. Value
-              </span>
-            </div>
-            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-dealflow-teal transition-all duration-300"
-                style={{ 
-                  width: step === 'about-you' ? '25%' : 
-                         step === 'about-podcast' ? '50%' : 
-                         step === 'audience' ? '75%' : '100%' 
-                }}
-              />
+        <div className="bg-white border-b border-dealflow-light-grey/30 shadow-sm sticky top-0 z-20">
+          {/* Progress Bar */}
+          <div className="max-w-4xl mx-auto px-6 py-1.5 border-b border-dealflow-light-grey/20">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                <span className={`text-xs font-body font-medium transition-colors duration-200 ${step === 'about-you' ? 'text-dealflow-sky font-semibold' : 'text-dealflow-light-grey'}`}>
+                  1. About You
+                </span>
+                <span className={`text-xs font-body font-medium transition-colors duration-200 ${step === 'about-podcast' ? 'text-dealflow-sky font-semibold' : 'text-dealflow-light-grey'}`}>
+                  2. Podcast
+                </span>
+                <span className={`text-xs font-body font-medium transition-colors duration-200 ${step === 'audience' ? 'text-dealflow-sky font-semibold' : 'text-dealflow-light-grey'}`}>
+                  3. Audience
+                </span>
+                <span className={`text-xs font-body font-medium transition-colors duration-200 ${step === 'your-value' ? 'text-dealflow-sky font-semibold' : 'text-dealflow-light-grey'}`}>
+                  4. Value
+                </span>
+              </div>
+              <div className="flex-1 max-w-xs">
+                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                  <div 
+                    className="h-full bg-gradient-to-r from-dealflow-sky to-dealflow-orange transition-all duration-500 ease-out rounded-full"
+                    style={{ 
+                      width: step === 'about-you' ? '25%' : 
+                             step === 'about-podcast' ? '50%' : 
+                             step === 'audience' ? '75%' : '100%' 
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Pitch Score - Show on all form steps */}
-      {step !== 'generating' && step !== 'results' && (
-        <div className="bg-white border-b border-gray-200 py-3">
-          <div className="max-w-3xl mx-auto px-6">
+          {/* Pitch Score */}
+          <div className="max-w-4xl mx-auto px-6 py-1.5">
             <PitchScore formData={formData} score={score} />
           </div>
         </div>
@@ -359,16 +355,16 @@ export default function Home() {
 
       {/* Error Message */}
       {error && (
-        <div className="max-w-3xl mx-auto px-6 mt-6">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            <div className="flex items-start gap-2">
-              <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="max-w-4xl mx-auto px-6 mt-6">
+          <div className="bg-dealflow-muted-red/10 border-2 border-dealflow-muted-red/30 text-dealflow-muted-red px-6 py-4 rounded-xl shadow-md">
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p className="font-medium">{error}</p>
+                <p className="font-body font-semibold text-lg">{error}</p>
                 {error.includes('strength') && (
-                  <p className="text-sm mt-2 text-red-600">
+                  <p className="text-sm mt-2 text-dealflow-muted-red/80 font-body">
                     Check the pitch strength meter above to see which fields need completion.
                   </p>
                 )}
@@ -379,13 +375,13 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-8">
         {step === 'generating' && (
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-dealflow-midnight mb-2">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-heading font-bold text-dealflow-midnight mb-3">
               Writing a Podcast Guest Pitch That Actually Gets Replies
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-xl font-body text-dealflow-light-grey">
               3 personalized pitches, ready to copy and send.
             </p>
           </div>
@@ -395,10 +391,10 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-dealflow-midnight text-white py-8 mt-12">
-        <div className="max-w-3xl mx-auto px-6 text-center text-sm text-gray-400">
-          <p>Built by DealFlow Media</p>
-          <p className="mt-1">© 2026 All rights reserved</p>
+      <footer className="bg-gradient-to-r from-dealflow-midnight to-dealflow-sky text-white py-10 mt-16 shadow-lg">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="font-body font-semibold text-lg">Built by DealFlow Media</p>
+          <p className="mt-2 text-sm font-body text-white/80">© 2026 All rights reserved</p>
         </div>
       </footer>
     </main>

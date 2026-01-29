@@ -1,4 +1,20 @@
 import Script from 'next/script';
+import { Merriweather, Nunito } from 'next/font/google';
+import './globals.css';
+
+const merriweather = Merriweather({
+  weight: ['400', '700', '900'],
+  subsets: ['latin'],
+  variable: '--font-merriweather',
+  display: 'swap',
+});
+
+const nunito = Nunito({
+  weight: ['400', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-nunito',
+  display: 'swap',
+});
 
 /** @type {import('next').Metadata} */
 export const metadata = {
@@ -26,7 +42,7 @@ export default function RootLayout({
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-NQLMF2W0KJ';
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${merriweather.variable} ${nunito.variable}`}>
       <head>
         {/* Meta Pixel - loads on page load for retargeting */}
         <script
@@ -90,7 +106,7 @@ export default function RootLayout({
           />
         </noscript>
       </head>
-      <body className="bg-dealflow-cream text-dealflow-midnight antialiased">
+      <body className="bg-dealflow-cream text-dealflow-midnight antialiased font-body">
         {/* Google Analytics */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
