@@ -8,6 +8,11 @@ import { YourValue } from '@/components/FormFields/YourValue';
 import { PitchScore } from '@/components/PitchScore';
 import { Results } from '@/components/Results';
 import { calculatePitchScore, type FormData as ScoringFormData } from '@/lib/scoring';
+import { 
+  trackFormStarted, 
+  trackFormStepCompleted, 
+  trackPitchGenerated 
+} from '@/lib/analytics';
 
 type Step = 'about-you' | 'about-podcast' | 'audience' | 'your-value' | 'generating' | 'results';
 
@@ -52,6 +57,7 @@ interface PitchResponse {
 
 export default function Home() {
   const [step, setStep] = useState<Step>('about-you');
+  const [hasTrackedFormStart, setHasTrackedFormStart] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -123,6 +129,34 @@ export default function Home() {
 
   // Calculate pitch score using shared scoring logic
   const score = useMemo(() => calculatePitchScore(formData), [formData]);
+
+  // Track form started (when user first interacts)
+  useEffect(() => {
+    if (step === 'about-you' && !hasTrackedFormStart) {
+      trackFormStarted();
+      setHasTrackedFormStart(true);
+    }
+  }, [step, hasTrackedFormStart]);
+
+  // Track form step completions
+  useEffect(() => {
+    if (step === 'about-podcast') {
+      trackFormStepCompleted('about-you');
+    } else if (step === 'audience') {
+      trackFormStepCompleted('about-podcast');
+    } else if (step === 'your-value') {
+      trackFormStepCompleted('audience');
+    } else if (step === 'generating') {
+      trackFormStepCompleted('your-value');
+    }
+  }, [step]);
+
+  // Track pitch generation when pitches are successfully generated
+  useEffect(() => {
+    if (pitches && step === 'results') {
+      trackPitchGenerated(score);
+    }
+  }, [pitches, step, score]);
 
   const generatePitches = async () => {
     setStep('generating');

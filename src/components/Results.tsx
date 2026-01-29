@@ -1,6 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { 
+  trackEmailVerificationStarted, 
+  trackEmailVerified, 
+  trackPitchDownloaded, 
+  trackPitchCopied 
+} from '@/lib/analytics';
 
 interface FormData {
   firstName: string;
@@ -61,6 +67,16 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
     try {
       await navigator.clipboard.writeText(text);
       setCopied(id);
+      
+      // Track copy event
+      if (id.startsWith('pitch-')) {
+        const pitchNum = parseInt(id.split('-')[1]) as 1 | 2 | 3;
+        trackPitchCopied(pitchNum);
+      } else if (id.startsWith('followup-')) {
+        const followupNum = parseInt(id.split('-')[1]);
+        trackPitchCopied(followupNum + 10); // Use 10+ for follow-ups to differentiate
+      }
+      
       setToastMessage('Pitch copied to clipboard!');
       setShowToast(true);
       setTimeout(() => {
@@ -100,6 +116,10 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    // Track download
+    trackPitchDownloaded(activePitch);
+    
     setToastMessage('Download started!');
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
@@ -126,6 +146,10 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    // Track download all
+    trackPitchDownloaded(0);
+    
     setToastMessage('All pitches downloaded!');
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
@@ -135,6 +159,9 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
     e.preventDefault();
     setEmailLoading(true);
     setEmailError(null);
+
+    // Track email verification started
+    trackEmailVerificationStarted();
 
     try {
       const response = await fetch('/api/verify-email', {
@@ -190,6 +217,10 @@ export function Results({ pitches, formData, emailSubmitted, onEmailSubmit, onGe
         setVerificationStep('verified');
         setShowEmailModal(false);
         onEmailSubmit();
+        
+        // Track email verification (primary conversion)
+        trackEmailVerified();
+        
         // Unlock pitches 2 and 3
         if (activePitch === 2 || activePitch === 3) {
           // Keep current selection

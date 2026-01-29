@@ -1,3 +1,5 @@
+import Script from 'next/script';
+
 /** @type {import('next').Metadata} */
 export const metadata = {
   title: 'Podcast Guest Pitch Generator | Write Pitches That Get Replies',
@@ -19,6 +21,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID || '425162551517396';
+  const linkedInPartnerId = process.env.NEXT_PUBLIC_LINKEDIN_PARTNER_ID || '8526065';
+  const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-NQLMF2W0KJ';
+
   return (
     <html lang="en">
       <head>
@@ -34,26 +40,70 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', 'YOUR_PIXEL_ID');
+              fbq('init', '${metaPixelId}');
+              fbq('track', 'PageView');
             `,
           }}
         />
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
+
         {/* LinkedIn Insight Tag */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              _linkedin_partner_id = "YOUR_LINKEDIN_ID";
-              window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
-              window.lintrk.q=[];
+              _linkedin_partner_id = "${linkedInPartnerId}";
+              window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+              window._linkedin_data_partner_ids.push(_linkedin_partner_id);
             `,
           }}
         />
         <script
-          async
-          src="https://snap.licdn.com/li.lms-analytics/insight.min.js"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(l) {
+                if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
+                window.lintrk.q=[]}
+                var s = document.getElementsByTagName("script")[0];
+                var b = document.createElement("script");
+                b.type = "text/javascript";b.async = true;
+                b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+                s.parentNode.insertBefore(b, s);
+              })(window.lintrk);
+            `,
+          }}
         />
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            alt=""
+            src={`https://px.ads.linkedin.com/collect/?pid=${linkedInPartnerId}&fmt=gif`}
+          />
+        </noscript>
       </head>
       <body className="bg-dealflow-cream text-dealflow-midnight antialiased">
+        {/* Google Analytics */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${gaMeasurementId}');
+          `}
+        </Script>
         {children}
       </body>
     </html>
