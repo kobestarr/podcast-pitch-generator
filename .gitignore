@@ -43,3 +43,7 @@ next-env.d.ts
 
 # Claude
 .claude/
+
+# Local-only guides that contain live API keys (never commit, repo is public)
+COPY_PASTE_GUIDE.md
+VERCEL_ENV_VARIABLES.md
